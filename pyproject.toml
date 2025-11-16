@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "nepal-entity-service-fastapi"
+version = "2.0.0"
+description = "🇳🇵 Open Source, open data, and open API for managing Nepali public entities with FastAPI and PostgreSQL"
+authors = ["NewNepal Contributors"]
+license = "Hippocratic-3.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.109.2"
+uvicorn = {extras = ["standard"], version = "^0.27.1"}
+pydantic = "^2.6.1"
+pydantic-settings = "^2.1.0"
+sqlalchemy = "^2.0.25"
+asyncpg = "^0.29.0"
+psycopg2-binary = "^2.9.9"
+alembic = "^1.13.1"
+python-dotenv = "^1.0.1"
+click = "^8.1.7"
+nepali-date-utils = "^0.1.0"
+markdown = "^3.5.2"
+pymdown-extensions = "^10.7"
+python-multipart = "^0.0.9"
+httpx = "^0.26.0"
+redis = "^5.0.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-asyncio = "^0.23.0"
+black = "^24.0.0"
+isort = "^5.13.0"
+flake8 = "^7.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ['py312']
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
