@@ -130,6 +130,7 @@ class EntityUpdate(BaseModel):
         }
 
 
+
 class EntityResponse(EntityBase):
     """Schema for entity responses with all fields."""
 
@@ -137,9 +138,16 @@ class EntityResponse(EntityBase):
     created_at: datetime = Field(..., description="Creation timestamp")
     updated_at: Optional[datetime] = Field(None, description="Last update timestamp")
     version: str = Field(..., description="Entity version")
+    # Map 'meta_data' from model to 'metadata' in response
+    metadata: Optional[Dict[str, Any]] = Field(
+        default_factory=dict,
+        alias="meta_data",  # Read from model's meta_data attribute
+        description="Additional metadata in JSON format"
+    )
 
     class Config:
         from_attributes = True
+        populate_by_name = True  # Allow both 'metadata' and 'meta_data' in JSON
         json_schema_extra = {
             "example": {
                 "id": "123e4567-e89b-12d3-a456-426614174000",
@@ -153,5 +161,4 @@ class EntityResponse(EntityBase):
                 "version": "1.0",
             }
         }
-
 

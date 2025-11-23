@@ -42,14 +42,15 @@ class Relationship(Base):
     )
     relationship_type = Column(String(100), nullable=False, index=True)
     description = Column(Text, nullable=True)
-    metadata = Column(JSONB, nullable=True, default={})
+    # Use 'meta_data' as Python attribute name, but map to 'metadata' column in DB
+    meta_data = Column("metadata", JSONB, nullable=True, default={})
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Composite indexes for better query performance
     __table_args__ = (
         Index("ix_relationships_source_target", "source_entity_id", "target_entity_id"),
-        Index("ix_relationships_metadata", "metadata", postgresql_using="gin"),
+        Index("ix_relationships_metadata", meta_data, postgresql_using="gin"),  # Use meta_data here
         Index("ix_relationships_type_created", "relationship_type", created_at.desc()),
     )
 
@@ -60,4 +61,3 @@ class Relationship(Base):
             String representation
         """
         return f"<Relationship(id={self.id}, type={self.relationship_type})>"
-

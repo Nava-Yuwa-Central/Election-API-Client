@@ -40,7 +40,11 @@ async def create_entity(
         DatabaseError: If database operation fails
     """
     try:
-        db_entity = Entity(**entity.model_dump())
+        entity_data = entity.model_dump()
+        # Map 'metadata' from schema to 'meta_data' in model
+        if 'metadata' in entity_data:
+            entity_data['meta_data'] = entity_data.pop('metadata')
+        db_entity = Entity(**entity_data)
         db.add(db_entity)
         await db.commit()
         await db.refresh(db_entity)
@@ -186,6 +190,9 @@ async def update_entity(
             raise EntityNotFoundError(str(entity_id))
 
         update_data = entity_update.model_dump(exclude_unset=True)
+        # Map 'metadata' from schema to 'meta_data' in model
+        if 'metadata' in update_data:
+            update_data['meta_data'] = update_data.pop('metadata')
         for field, value in update_data.items():
             setattr(entity, field, value)
 
@@ -237,4 +244,3 @@ async def delete_entity(
         logger.error(f"Error deleting entity: {str(e)}")
         await db.rollback()
         raise DatabaseError(f"Failed to delete entity: {str(e)}")
-

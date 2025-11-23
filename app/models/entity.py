@@ -45,7 +45,8 @@ class Entity(Base):
     name_nepali = Column(String(255), nullable=True, index=True)
     entity_type = Column(Enum(EntityType), nullable=False, index=True)
     description = Column(Text, nullable=True)
-    metadata = Column(JSONB, nullable=True, default={})
+    # Use 'meta_data' as Python attribute name, but map to 'metadata' column in DB
+    meta_data = Column("metadata", JSONB, nullable=True, default={})
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     version = Column(String(50), default="1.0")
@@ -53,7 +54,7 @@ class Entity(Base):
     # Composite indexes for better query performance
     __table_args__ = (
         Index("ix_entities_name_type", "name", "entity_type"),
-        Index("ix_entities_metadata", "metadata", postgresql_using="gin"),
+        Index("ix_entities_metadata", meta_data, postgresql_using="gin"),  # Use meta_data here
         Index("ix_entities_created_at_desc", created_at.desc()),
     )
 
@@ -64,4 +65,3 @@ class Entity(Base):
             String representation
         """
         return f"<Entity(id={self.id}, name={self.name}, type={self.entity_type})>"
-

@@ -2,6 +2,7 @@
 
 from typing import List
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 from functools import lru_cache
 import secrets
 
@@ -56,11 +57,11 @@ class Settings(BaseSettings):
     API_TITLE: str = "Nepal Entity Service API"
     API_DESCRIPTION: str = "🇳🇵 Open Source API for managing Nepali public entities"
 
-    class Config:
-        """Pydantic config class."""
-
-        env_file = ".env"
-        case_sensitive = True
+    model_config = ConfigDict(
+        env_file=".env",
+        case_sensitive=True,
+        extra="ignore"  # Ignore extra environment variables (like POSTGRES_USER, etc.)
+    )
 
 
 @lru_cache()
@@ -74,5 +75,3 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
-
-

@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import text
 import logging
 
 from app.core.config import settings
@@ -70,9 +71,8 @@ async def check_database_health() -> bool:
     """
     try:
         async with AsyncSessionLocal() as session:
-            await session.execute("SELECT 1")
+            await session.execute(text("SELECT 1"))
             return True
     except Exception as e:
         logger.error(f"Database health check failed: {str(e)}")
         return False
-

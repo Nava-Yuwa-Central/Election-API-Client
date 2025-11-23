@@ -42,6 +42,7 @@ class RelationshipBase(BaseModel):
             Sanitized description
         """
         if v:
+            # Remove all HTML tags and scripts
             return bleach.clean(v, tags=[], strip=True)
         return v
 
@@ -60,8 +61,10 @@ class RelationshipBase(BaseModel):
             sanitized = {}
             for key, value in v.items():
                 if isinstance(value, str):
+                    # Sanitize string values
                     sanitized[key] = bleach.clean(value, tags=[], strip=True)
                 else:
+                    # Keep other types as-is
                     sanitized[key] = value
             return sanitized
         return v
@@ -76,7 +79,7 @@ class RelationshipCreate(RelationshipBase):
                 "source_entity_id": "123e4567-e89b-12d3-a456-426614174000",
                 "target_entity_id": "123e4567-e89b-12d3-a456-426614174001",
                 "relationship_type": "member_of",
-                "description": "Member since 2020",
+                "description": "Member of political party",
                 "metadata": {"role": "President", "start_date": "2020-01-01"},
             }
         }
@@ -126,20 +129,25 @@ class RelationshipResponse(RelationshipBase):
     id: UUID = Field(..., description="Unique relationship identifier")
     created_at: datetime = Field(..., description="Creation timestamp")
     updated_at: Optional[datetime] = Field(None, description="Last update timestamp")
+    # Map 'meta_data' from model to 'metadata' in response
+    metadata: Optional[Dict[str, Any]] = Field(
+        default_factory=dict,
+        alias="meta_data",  # Read from model's meta_data attribute
+        description="Additional metadata in JSON format"
+    )
 
     class Config:
         from_attributes = True
+        populate_by_name = True  # Allow both 'metadata' and 'meta_data' in JSON
         json_schema_extra = {
             "example": {
                 "id": "123e4567-e89b-12d3-a456-426614174002",
                 "source_entity_id": "123e4567-e89b-12d3-a456-426614174000",
                 "target_entity_id": "123e4567-e89b-12d3-a456-426614174001",
                 "relationship_type": "member_of",
-                "description": "Member since 2020",
+                "description": "Member of political party",
                 "metadata": {"role": "President"},
                 "created_at": "2025-11-23T05:00:00Z",
                 "updated_at": "2025-11-23T06:00:00Z",
             }
         }
-
-
