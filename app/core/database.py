@@ -1,18 +1,35 @@
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+"""Database configuration and session management."""
+
+from typing import AsyncGenerator
+from sqlalchemy.ext.asyncio import (
+    create_async_engine,
+    AsyncSession,
+    async_sessionmaker,
+    AsyncEngine,
+)
 from sqlalchemy.orm import declarative_base
+from sqlalchemy.exc import SQLAlchemyError
+import logging
+
 from app.core.config import settings
 
-DATABASE_URL = settings.DATABASE_URL.replace('postgresql://', 'postgresql+asyncpg://')
+logger = logging.getLogger(__name__)
 
-engine = create_async_engine(
+# Convert PostgreSQL URL to async version
+DATABASE_URL = settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
+
+# Create async engine with optimized pool settings
+engine: AsyncEngine = create_async_engine(
     DATABASE_URL,
-    echo=True if settings.LOG_LEVEL == "DEBUG" else False,
+    echo=settings.LOG_LEVEL == "DEBUG",
     future=True,
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
+    pool_pre_ping=True,  # Verify connections before using
+    pool_size=10,  # Number of connections to maintain
+    max_overflow=20,  # Additional connections when pool is full
+    pool_recycle=3600,  # Recycle connections after 1 hour
 )
 
+# Create session factory
 AsyncSessionLocal = async_sessionmaker(
     engine,
     class_=AsyncSession,
@@ -21,11 +38,41 @@ AsyncSessionLocal = async_sessionmaker(
     autoflush=False,
 )
 
+# Declarative base for models
 Base = declarative_base()
 
-async def get_db():
+
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """Get database session with automatic cleanup.
+
+    Yields:
+        AsyncSession: Database session
+
+    Raises:
+        DatabaseError: If database connection fails
+    """
     async with AsyncSessionLocal() as session:
         try:
             yield session
+        except SQLAlchemyError as e:
+            logger.error(f"Database error: {str(e)}")
+            await session.rollback()
+            raise
         finally:
             await session.close()
+
+
+async def check_database_health() -> bool:
+    """Check if database connection is healthy.
+
+    Returns:
+        bool: True if database is accessible, False otherwise
+    """
+    try:
+        async with AsyncSessionLocal() as session:
+            await session.execute("SELECT 1")
+            return True
+    except Exception as e:
+        logger.error(f"Database health check failed: {str(e)}")
+        return False
+
