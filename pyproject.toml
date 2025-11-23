@@ -25,6 +25,10 @@ python-multipart = "^0.0.9"
 httpx = "^0.26.0"
 redis = "^5.0.1"
 python-json-logger = "^2.0.7"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+slowapi = "^0.1.9"
+bleach = "^6.1.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"

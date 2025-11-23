@@ -1,9 +1,10 @@
 """Pydantic schemas for Relationship endpoints."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, Dict, Any
 from datetime import datetime
 from uuid import UUID
+import bleach
 
 
 class RelationshipBase(BaseModel):
@@ -23,11 +24,47 @@ class RelationshipBase(BaseModel):
         examples=["member_of", "works_for", "partner_with"],
     )
     description: Optional[str] = Field(
-        None, description="Detailed description of the relationship"
+        None, max_length=5000, description="Detailed description of the relationship"
     )
     metadata: Optional[Dict[str, Any]] = Field(
         default_factory=dict, description="Additional metadata in JSON format"
     )
+
+    @field_validator("description")
+    @classmethod
+    def sanitize_description(cls, v: Optional[str]) -> Optional[str]:
+        """Sanitize description to prevent XSS.
+
+        Args:
+            v: Description value
+
+        Returns:
+            Sanitized description
+        """
+        if v:
+            return bleach.clean(v, tags=[], strip=True)
+        return v
+
+    @field_validator("metadata")
+    @classmethod
+    def sanitize_metadata(cls, v: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        """Sanitize metadata string values.
+
+        Args:
+            v: Metadata dictionary
+
+        Returns:
+            Sanitized metadata
+        """
+        if v:
+            sanitized = {}
+            for key, value in v.items():
+                if isinstance(value, str):
+                    sanitized[key] = bleach.clean(value, tags=[], strip=True)
+                else:
+                    sanitized[key] = value
+            return sanitized
+        return v
 
 
 class RelationshipCreate(RelationshipBase):
@@ -49,8 +86,30 @@ class RelationshipUpdate(BaseModel):
     """Schema for updating an existing relationship (all fields optional)."""
 
     relationship_type: Optional[str] = Field(None, min_length=1, max_length=100)
-    description: Optional[str] = None
+    description: Optional[str] = Field(None, max_length=5000)
     metadata: Optional[Dict[str, Any]] = None
+
+    @field_validator("description")
+    @classmethod
+    def sanitize_description(cls, v: Optional[str]) -> Optional[str]:
+        """Sanitize description to prevent XSS."""
+        if v:
+            return bleach.clean(v, tags=[], strip=True)
+        return v
+
+    @field_validator("metadata")
+    @classmethod
+    def sanitize_metadata(cls, v: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        """Sanitize metadata string values."""
+        if v:
+            sanitized = {}
+            for key, value in v.items():
+                if isinstance(value, str):
+                    sanitized[key] = bleach.clean(value, tags=[], strip=True)
+                else:
+                    sanitized[key] = value
+            return sanitized
+        return v
 
     class Config:
         json_schema_extra = {
@@ -82,4 +141,5 @@ class RelationshipResponse(RelationshipBase):
                 "updated_at": "2025-11-23T06:00:00Z",
             }
         }
+
 

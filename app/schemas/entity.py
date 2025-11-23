@@ -1,9 +1,10 @@
 """Pydantic schemas for Entity endpoints."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, Dict, Any
 from datetime import datetime
 from uuid import UUID
+import bleach
 
 from app.models.entity import EntityType
 
@@ -28,11 +29,50 @@ class EntityBase(BaseModel):
         ..., description="Type of entity", examples=["government", "person"]
     )
     description: Optional[str] = Field(
-        None, description="Detailed description of the entity"
+        None, max_length=5000, description="Detailed description of the entity"
     )
     metadata: Optional[Dict[str, Any]] = Field(
         default_factory=dict, description="Additional metadata in JSON format"
     )
+
+    @field_validator("description")
+    @classmethod
+    def sanitize_description(cls, v: Optional[str]) -> Optional[str]:
+        """Sanitize description to prevent XSS.
+
+        Args:
+            v: Description value
+
+        Returns:
+            Sanitized description
+        """
+        if v:
+            # Remove all HTML tags and scripts
+            return bleach.clean(v, tags=[], strip=True)
+        return v
+
+    @field_validator("metadata")
+    @classmethod
+    def sanitize_metadata(cls, v: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        """Sanitize metadata string values.
+
+        Args:
+            v: Metadata dictionary
+
+        Returns:
+            Sanitized metadata
+        """
+        if v:
+            sanitized = {}
+            for key, value in v.items():
+                if isinstance(value, str):
+                    # Sanitize string values
+                    sanitized[key] = bleach.clean(value, tags=[], strip=True)
+                else:
+                    # Keep other types as-is
+                    sanitized[key] = value
+            return sanitized
+        return v
 
 
 class EntityCreate(EntityBase):
@@ -56,8 +96,30 @@ class EntityUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     name_nepali: Optional[str] = Field(None, max_length=255)
     entity_type: Optional[EntityType] = None
-    description: Optional[str] = None
+    description: Optional[str] = Field(None, max_length=5000)
     metadata: Optional[Dict[str, Any]] = None
+
+    @field_validator("description")
+    @classmethod
+    def sanitize_description(cls, v: Optional[str]) -> Optional[str]:
+        """Sanitize description to prevent XSS."""
+        if v:
+            return bleach.clean(v, tags=[], strip=True)
+        return v
+
+    @field_validator("metadata")
+    @classmethod
+    def sanitize_metadata(cls, v: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        """Sanitize metadata string values."""
+        if v:
+            sanitized = {}
+            for key, value in v.items():
+                if isinstance(value, str):
+                    sanitized[key] = bleach.clean(value, tags=[], strip=True)
+                else:
+                    sanitized[key] = value
+            return sanitized
+        return v
 
     class Config:
         json_schema_extra = {
@@ -91,4 +153,5 @@ class EntityResponse(EntityBase):
                 "version": "1.0",
             }
         }
+
 
