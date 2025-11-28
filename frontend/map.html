@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interactive map of Nepal showing political leaders by province">
+
+    <title>Interactive Map - Who's My Neta Nepal</title>
+
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="/frontend/styles/main.css">
+    <link rel="stylesheet" href="/frontend/styles/components.css">
+    <link rel="stylesheet" href="/frontend/styles/animations.css">
+
+    <style>
+        .map-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: var(--spacing-xl);
+            min-height: 600px;
+        }
+
+        #map-svg {
+            background-color: var(--color-white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            padding: var(--spacing-lg);
+        }
+
+        .province-info {
+            background-color: var(--color-white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            padding: var(--spacing-xl);
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .province-name-large {
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            margin-bottom: var(--spacing-md);
+            color: var(--color-primary);
+        }
+
+        .leaders-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .leader-mini-card {
+            display: flex;
+            gap: var(--spacing-md);
+            padding: var(--spacing-md);
+            border: 1px solid var(--color-gray-light);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .leader-mini-card:hover {
+            border-color: var(--color-primary);
+            box-shadow: var(--shadow-md);
+            transform: translateX(4px);
+        }
+
+        .leader-mini-img {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+        }
+
+        @media (max-width: 968px) {
+            .map-container {
+                grid-template-columns: 1fr;
+            }
+
+            .province-info {
+                max-height: 400px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <span>🇳🇵</span>
+                <span>Who's My Neta Nepal</span>
+            </a>
+
+            <button class="navbar-toggle" id="navbarToggle">☰</button>
+
+            <ul class="navbar-nav" id="navbarNav">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="map.html" class="nav-link active">Map</a></li>
+                <li><a href="leaders.html" class="nav-link">Leaders</a></li>
+                <li><a href="parties.html" class="nav-link">Parties</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="section bg-white">
+        <div class="container">
+            <h1 class="text-center fade-in-down">Interactive Nepal Map</h1>
+            <p class="text-center text-muted fade-in-up">
+                Click on a province to explore its political leaders
+            </p>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="section">
+        <div class="container">
+            <div class="map-container">
+                <!-- Map SVG -->
+                <div id="map-svg">
+                    <svg viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg">
+                        <text x="500" y="300" text-anchor="middle" font-size="20" fill="#999">
+                            Loading map...
+                        </text>
+                    </svg>
+                </div>
+
+                <!-- Province Info Sidebar -->
+                <div class="province-info" id="provinceInfo">
+                    <div class="text-center text-muted" style="padding: var(--spacing-3xl) 0;">
+                        <div style="font-size: 64px; margin-bottom: var(--spacing-lg);">🗺️</div>
+                        <h3>Select a Province</h3>
+                        <p>Click on any province in the map to view its leaders</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Who's My Neta Nepal</h4>
+                    <p style="color: rgba(255, 255, 255, 0.7);">An open platform to explore Nepali political leaders.
+                    </p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="map.html">Map</a></li>
+                        <li><a href="leaders.html">Leaders</a></li>
+                        <li><a href="parties.html">Parties</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Who's My Neta Nepal. Open Data Initiative.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/frontend/js/config.js"></script>
+    <script src="/frontend/js/api.js"></script>
+    <script src="/frontend/js/utils.js"></script>
+    <script src="/frontend/js/main.js"></script>
+
+    <script>
+        let selectedProvince = null;
+        let leadersData = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🗺️ Map Page Loaded');
+
+            // Load map data and render
+            await loadMap();
+
+            // Load all leaders
+            try {
+                leadersData = await api.fetchLeaders({ limit: 1000 });
+                console.log(`Loaded ${leadersData.length} leaders`);
+            } catch (error) {
+                console.error('Error loading leaders:', error);
+            }
+        });
+
+        async function loadMap() {
+            try {
+                const response = await fetch('data/nepal-provinces.geojson');
+                const geojson = await response.json();
+
+                renderMap(geojson);
+            } catch (error) {
+                console.error('Error loading map:', error);
+                document.getElementById('map-svg').innerHTML = `
+          <div style="text-align: center; padding: var(--spacing-3xl);">
+            <p style="color: var(--color-danger);">Failed to load map data</p>
+          </div>
+        `;
+            }
+        }
+
+        function renderMap(geojson) {
+            const svg = document.querySelector('#map-svg svg');
+            svg.innerHTML = ''; // Clear loading text
+
+            // Nepal provinces with simplified rectangles for demonstration
+            const provinces = [
+                { id: 1, name: 'Koshi', x: 700, y: 200, width: 250, height: 180, color: '#FF6B6B' },
+                { id: 2, name: 'Madhesh', x: 450, y: 380, width: 300, height: 100, color: '#4ECDC4' },
+                { id: 3, name: 'Bagmati', x: 400, y: 220, width: 200, height: 160, color: '#45B7D1' },
+                { id: 4, name: 'Gandaki', x: 280, y: 140, width: 180, height: 140, color: '#96CEB4' },
+                { id: 5, name: 'Lumbini', x: 220, y: 250, width: 200, height: 180, color: '#FFEAA7' },
+                { id: 6, name: 'Karnali', x: 180, y: 50, width: 180, height: 150, color: '#DFE6E9' },
+                { id: 7, name: 'Sudurpashchim', x: 50, y: 100, width: 170, height: 200, color: '#74B9FF' },
+            ];
+
+            // Create group for map
+            const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+            provinces.forEach(province => {
+                // Create province rectangle
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', province.x);
+                rect.setAttribute('y', province.y);
+                rect.setAttribute('width', province.width);
+                rect.setAttribute('height', province.height);
+                rect.setAttribute('fill', province.color);
+                rect.setAttribute('fill-opacity', '0.6');
+                rect.setAttribute('stroke', '#fff');
+                rect.setAttribute('stroke-width', '3');
+                rect.setAttribute('class', 'province-path');
+                rect.setAttribute('data-province', province.name);
+                rect.style.cursor = 'pointer';
+                rect.style.transition = 'all 0.3s ease';
+
+                // Add hover effect
+                rect.addEventListener('mouseenter', function () {
+                    this.setAttribute('fill-opacity', '0.9');
+                    this.setAttribute('stroke', '#DC143C');
+                });
+
+                rect.addEventListener('mouseleave', function () {
+                    if (selectedProvince !== province.name) {
+                        this.setAttribute('fill-opacity', '0.6');
+                        this.setAttribute('stroke', '#fff');
+                    }
+                });
+
+                // Add click handler
+                rect.addEventListener('click', () => selectProvince(province.name));
+
+                group.appendChild(rect);
+
+                // Add province label
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', province.x + province.width / 2);
+                text.setAttribute('y', province.y + province.height / 2);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'middle');
+                text.setAttribute('font-size', '20');
+                text.setAttribute('font-weight', 'bold');
+                text.setAttribute('fill', '#333');
+                text.setAttribute('pointer-events', 'none');
+                text.textContent = province.name;
+
+                group.appendChild(text);
+            });
+
+            svg.appendChild(group);
+        }
+
+        function selectProvince(provinceName) {
+            selectedProvince = provinceName;
+            console.log('Selected province:', provinceName);
+
+            // Update map visual state
+            document.querySelectorAll('.province-path').forEach(path => {
+                const pathProvince = path.getAttribute('data-province');
+                if (pathProvince === provinceName) {
+                    path.setAttribute('fill-opacity', '1');
+                    path.setAttribute('stroke', '#DC143C');
+                    path.setAttribute('stroke-width', '4');
+                } else {
+                    path.setAttribute('fill-opacity', '0.4');
+                    path.setAttribute('stroke', '#fff');
+                    path.setAttribute('stroke-width', '3');
+                }
+            });
+
+            // Show leaders for this province
+            showProvinceLeaders(provinceName);
+        }
+
+        function showProvinceLeaders(provinceName) {
+            const infoDiv = document.getElementById('provinceInfo');
+
+            // Filter leaders by province
+            const provinceLeaders = leadersData.filter(leader =>
+                leader.metadata?.province?.toLowerCase() === provinceName.toLowerCase()
+            );
+
+            const provinceMap = {
+                'Koshi': 'कोशी प्रदेश',
+                'Madhesh': 'मधेश प्रदेश',
+                'Bagmati': 'बागमती प्रदेश',
+                'Gandaki': 'गण्डकी प्रदेश',
+                'Lumbini': 'लुम्बिनी प्रदेश',
+                'Karnali': 'कर्णाली प्रदेश',
+                'Sudurpashchim': 'सुदूरपश्चिम प्रदेश',
+            };
+
+            if (provinceLeaders.length === 0) {
+                infoDiv.innerHTML = `
+          <h2 class="province-name-large">${provinceName}</h2>
+          <p class="nepali-text text-muted mb-lg">${provinceMap[provinceName] || ''}</p>
+          <div class="text-center text-muted" style="padding: var(--spacing-2xl) 0;">
+            <div style="font-size: 48px; margin-bottom: var(--spacing-md);">📭</div>
+            <p>No leaders found for this province</p>
+            <a href="leaders.html" class="btn btn-primary mt-md">View All Leaders</a>
+          </div>
+        `;
+                return;
+            }
+
+            infoDiv.innerHTML = `
+        <h2 class="province-name-large">${provinceName}</h2>
+        <p class="nepali-text text-muted mb-lg">${provinceMap[provinceName] || ''}</p>
+        <p class="text-muted mb-lg">${provinceLeaders.length} leader${provinceLeaders.length !== 1 ? 's' : ''}</p>
+        
+        <div class="leaders-list">
+          ${provinceLeaders.map(leader => `
+            <div class="leader-mini-card" onclick="window.location.href='leader-detail.html?id=${leader.id}'">
+              <img 
+                src="${getImageUrl(leader)}" 
+                alt="${sanitizeHTML(leader.name)}"
+                class="leader-mini-img"
+                onerror="this.src='assets/placeholder.jpg'"
+              >
+              <div>
+                <h4 style="margin-bottom: var(--spacing-xs); font-size: var(--font-size-base);">${sanitizeHTML(leader.name)}</h4>
+                ${leader.name_nepali ? `<p class="nepali-text" style="color: var(--color-gray); font-size: var(--font-size-sm); margin-bottom: var(--spacing-xs);">${sanitizeHTML(leader.name_nepali)}</p>` : ''}
+                ${leader.metadata?.party ? `<span class="party-badge ${getPartyBadgeClass(leader.metadata.party)}" style="font-size: var(--font-size-xs); padding: 2px 8px;">${sanitizeHTML(leader.metadata.party)}</span>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        
+        <div class="text-center mt-lg">
+          <a href="leaders.html?province=${encodeURIComponent(provinceName)}" class="btn btn-outline">
+            View All ${provinceName} Leaders →
+          </a>
+        </div>
+      `;
+        }
+    </script>
+</body>
+
+</html>

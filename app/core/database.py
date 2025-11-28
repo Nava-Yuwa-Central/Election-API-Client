@@ -16,18 +16,29 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-# Convert PostgreSQL URL to async version
-DATABASE_URL = settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
+# Convert PostgreSQL URL to async version if needed
+DATABASE_URL = settings.DATABASE_URL
+if "postgresql://" in DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
 
 # Create async engine with optimized pool settings
+engine_args = {
+    "echo": settings.LOG_LEVEL == "DEBUG",
+    "future": True,
+}
+
+# Add pool settings only for non-SQLite databases
+if "sqlite" not in DATABASE_URL:
+    engine_args.update({
+        "pool_pre_ping": True,
+        "pool_size": 10,
+        "max_overflow": 20,
+        "pool_recycle": 3600,
+    })
+
 engine: AsyncEngine = create_async_engine(
     DATABASE_URL,
-    echo=settings.LOG_LEVEL == "DEBUG",
-    future=True,
-    pool_pre_ping=True,  # Verify connections before using
-    pool_size=10,  # Number of connections to maintain
-    max_overflow=20,  # Additional connections when pool is full
-    pool_recycle=3600,  # Recycle connections after 1 hour
+    **engine_args
 )
 
 # Create session factory

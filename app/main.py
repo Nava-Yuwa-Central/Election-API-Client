@@ -5,8 +5,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse, FileResponse
 from slowapi.errors import RateLimitExceeded
 import logging
+from pathlib import Path
 
 from app.core.config import settings
 from app.core.database import engine, Base, check_database_health
@@ -111,27 +114,43 @@ app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 # Include API routes
 app.include_router(api_router, prefix="/api/v1", tags=["v1"])
 
+# Mount static files (frontend)
+frontend_path = Path(__file__).parent.parent / "frontend"
+if frontend_path.exists():
+    app.mount("/frontend", StaticFiles(directory=str(frontend_path)), name="frontend")
+    logger.info(f"Mounted frontend static files from {frontend_path}")
+else:
+    logger.warning(f"Frontend directory not found at {frontend_path}")
+
 
 @app.get(
     "/",
-    summary="Root endpoint",
-    description="Get basic API information",
+    response_class=HTMLResponse,
+    summary="Root endpoint - Serve frontend",
+    description="Serve the Who's My Neta Nepal frontend",
     tags=["General"],
 )
 async def root():
-    """Root endpoint with API information.
+    """Serve the frontend index.html.
 
     Returns:
-        Basic API information
+        HTML content of the frontend
     """
-    return {
-        "message": "Nepal Entity Service API",
-        "version": settings.API_VERSION,
-        "docs": "/docs",
-        "health": "/health",
-        "environment": settings.ENVIRONMENT,
-        "authentication_required": settings.REQUIRE_AUTHENTICATION,
-    }
+    index_path = Path(__file__).parent.parent / "frontend" / "index.html"
+    
+    if index_path.exists():
+        return FileResponse(index_path)
+    else:
+        # Fallback to API information
+        from fastapi.responses import JSONResponse
+        return JSONResponse({
+            "message": "Who's My Neta Nepal - API",
+            "version": settings.API_VERSION,
+            "frontend": "Not found",
+            "docs": "/docs",
+            "health": "/health",
+            "environment": settings.ENVIRONMENT,
+        })
 
 
 @app.get(

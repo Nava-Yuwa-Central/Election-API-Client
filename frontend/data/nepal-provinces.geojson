@@ -1,0 +1,261 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1,
+        "name": "Koshi",
+        "name_nepali": "कोशी प्रदेश",
+        "capital": "Biratnagar"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              87.7,
+              26.4
+            ],
+            [
+              88.2,
+              26.4
+            ],
+            [
+              88.2,
+              27.9
+            ],
+            [
+              86.8,
+              27.9
+            ],
+            [
+              86.8,
+              26.9
+            ],
+            [
+              87.7,
+              26.4
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2,
+        "name": "Madhesh",
+        "name_nepali": "मधेश प्रदेश",
+        "capital": "Janakpur"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              84.9,
+              26.3
+            ],
+            [
+              87.7,
+              26.3
+            ],
+            [
+              87.7,
+              27.3
+            ],
+            [
+              84.9,
+              27.3
+            ],
+            [
+              84.9,
+              26.3
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3,
+        "name": "Bagmati",
+        "name_nepali": "बागमती प्रदेश",
+        "capital": "Hetauda"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              84.5,
+              27.2
+            ],
+            [
+              86.3,
+              27.2
+            ],
+            [
+              86.3,
+              28.3
+            ],
+            [
+              84.5,
+              28.3
+            ],
+            [
+              84.5,
+              27.2
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 4,
+        "name": "Gandaki",
+        "name_nepali": "गण्डकी प्रदेश",
+        "capital": "Pokhara"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              83.2,
+              27.8
+            ],
+            [
+              85.0,
+              27.8
+            ],
+            [
+              85.0,
+              29.0
+            ],
+            [
+              83.2,
+              29.0
+            ],
+            [
+              83.2,
+              27.8
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 5,
+        "name": "Lumbini",
+        "name_nepali": "लुम्बिनी प्रदेश",
+        "capital": "Deukhuri"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              82.3,
+              27.2
+            ],
+            [
+              84.5,
+              27.2
+            ],
+            [
+              84.5,
+              28.7
+            ],
+            [
+              82.3,
+              28.7
+            ],
+            [
+              82.3,
+              27.2
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 6,
+        "name": "Karnali",
+        "name_nepali": "कर्णाली प्रदेश",
+        "capital": "Birendranagar"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              81.0,
+              28.5
+            ],
+            [
+              83.0,
+              28.5
+            ],
+            [
+              83.0,
+              30.4
+            ],
+            [
+              81.0,
+              30.4
+            ],
+            [
+              81.0,
+              28.5
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 7,
+        "name": "Sudurpashchim",
+        "name_nepali": "सुदूरपश्चिम प्रदेश",
+        "capital": "Godawari"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              80.0,
+              28.5
+            ],
+            [
+              81.5,
+              28.5
+            ],
+            [
+              81.5,
+              30.2
+            ],
+            [
+              80.0,
+              30.2
+            ],
+            [
+              80.0,
+              28.5
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

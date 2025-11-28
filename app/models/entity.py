@@ -1,7 +1,6 @@
 """Entity model for storing Nepali public entities."""
 
-from sqlalchemy import Column, String, DateTime, Text, Enum, Index
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import Column, String, DateTime, Text, Enum, Index, JSON, Uuid
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 import uuid
@@ -40,13 +39,13 @@ class Entity(Base):
 
     __tablename__ = "entities"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String(255), nullable=False, index=True)
     name_nepali = Column(String(255), nullable=True, index=True)
     entity_type = Column(Enum(EntityType), nullable=False, index=True)
     description = Column(Text, nullable=True)
     # Use 'meta_data' as Python attribute name, but map to 'metadata' column in DB
-    meta_data = Column("metadata", JSONB, nullable=True, default={})
+    meta_data = Column("metadata", JSON, nullable=True, default={})
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     version = Column(String(50), default="1.0")
@@ -54,7 +53,7 @@ class Entity(Base):
     # Composite indexes for better query performance
     __table_args__ = (
         Index("ix_entities_name_type", "name", "entity_type"),
-        Index("ix_entities_metadata", meta_data, postgresql_using="gin"),  # Use meta_data here
+        # Index("ix_entities_metadata", meta_data, postgresql_using="gin"),  # GIN index not supported in SQLite
         Index("ix_entities_created_at_desc", created_at.desc()),
     )
 

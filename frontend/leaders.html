@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Browse all political leaders in Nepal with advanced search and filtering">
+
+    <title>All Leaders - Who's My Neta Nepal</title>
+
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="/frontend/styles/main.css">
+    <link rel="stylesheet" href="/frontend/styles/components.css">
+    <link rel="stylesheet" href="/frontend/styles/animations.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <span>🇳🇵</span>
+                <span>Who's My Neta Nepal</span>
+            </a>
+
+            <button class="navbar-toggle" id="navbarToggle">☰</button>
+
+            <ul class="navbar-nav" id="navbarNav">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="map.html" class="nav-link">Map</a></li>
+                <li><a href="leaders.html" class="nav-link active">Leaders</a></li>
+                <li><a href="parties.html" class="nav-link">Parties</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="section bg-white">
+        <div class="container">
+            <h1 class="text-center fade-in-down">Political Leaders</h1>
+            <p class="text-center text-muted fade-in-up">
+                Explore Nepal's political representatives
+            </p>
+        </div>
+    </section>
+
+    <!-- Filter Bar -->
+    <section class="section" style="padding-top: 0;">
+        <div class="container">
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label class="filter-label" for="searchFilter">Search</label>
+                    <input type="text" id="searchFilter" class="search-bar"
+                        style="padding: var(--spacing-sm) var(--spacing-md);" placeholder="Search by name..."
+                        autocomplete="off">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label" for="partyFilter">Party</label>
+                    <select id="partyFilter" class="filter-select">
+                        <option value="">All Parties</option>
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label" for="provinceFilter">Province</label>
+                    <select id="provinceFilter" class="filter-select">
+                        <option value="">All Provinces</option>
+                        <option value="Koshi">Koshi</option>
+                        <option value="Madhesh">Madhesh</option>
+                        <option value="Bagmati">Bagmati</option>
+                        <option value="Gandaki">Gandaki</option>
+                        <option value="Lumbini">Lumbini</option>
+                        <option value="Karnali">Karnali</option>
+                        <option value="Sudurpashchim">Sudurpashchim</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label" for="sortFilter">Sort By</label>
+                    <select id="sortFilter" class="filter-select">
+                        <option value="name">Name (A-Z)</option>
+                        <option value="name_desc">Name (Z-A)</option>
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Results Info -->
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg);">
+                <p id="resultsInfo" class="text-muted">Loading leaders...</p>
+                <div style="display: flex; gap: var(--spacing-sm);">
+                    <button id="viewGrid" class="btn btn-sm btn-primary" onclick="setView('grid')">Grid</button>
+                    <button id="viewList" class="btn btn-sm btn-outline" onclick="setView('list')">List</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Leaders Grid -->
+    <section class="section" style="padding-top: 0;">
+        <div class="container">
+            <div class="grid grid-4" id="leadersGrid">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- Pagination -->
+            <div id="pagination" class="text-center mt-xl" style="display: none;">
+                <button id="prevPage" class="btn btn-outline" disabled>← Previous</button>
+                <span id="pageInfo" style="margin: 0 var(--spacing-lg); color: var(--color-gray);">Page 1</span>
+                <button id="nextPage" class="btn btn-outline">Next →</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Who's My Neta Nepal</h4>
+                    <p style="color: rgba(255, 255, 255, 0.7);">An open platform to explore Nepali political leaders.
+                    </p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="map.html">Map</a></li>
+                        <li><a href="leaders.html">Leaders</a></li>
+                        <li><a href="parties.html">Parties</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Who's My Neta Nepal. Open Data Initiative.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/frontend/js/config.js"></script>
+    <script src="/frontend/js/api.js"></script>
+    <script src="/frontend/js/utils.js"></script>
+    <script src="/frontend/js/main.js"></script>
+
+    <script>
+        // Page variables
+        let allLeaders = [];
+        let filteredLeaders = [];
+        let currentPage = 1;
+        let itemsPerPage = 12;
+        let currentView = 'grid';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🇳🇵 Leaders Page Loaded');
+
+            // Load all leaders
+            await loadLeaders();
+
+            // Load party filter options
+            await loadPartyOptions();
+
+            // Set up event listeners
+            setupEventListeners();
+
+            // Check URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('party')) {
+                document.getElementById('partyFilter').value = urlParams.get('party');
+                applyFilters();
+            }
+            if (urlParams.has('province')) {
+                document.getElementById('provinceFilter').value = urlParams.get('province');
+                applyFilters();
+            }
+        });
+
+        async function loadLeaders() {
+            const grid = document.getElementById('leadersGrid');
+            showLoading(grid, 'Loading leaders...');
+
+            try {
+                allLeaders = await api.fetchLeaders({ limit: 1000 });
+                filteredLeaders = [...allLeaders];
+                renderLeaders();
+            } catch (error) {
+                console.error('Error loading leaders:', error);
+                showError(grid, 'Failed to load leaders. Please try again.');
+            }
+        }
+
+        async function loadPartyOptions() {
+            try {
+                const parties = await api.fetchParties();
+                const select = document.getElementById('partyFilter');
+
+                parties.forEach(party => {
+                    const option = document.createElement('option');
+                    option.value = party.name;
+                    option.textContent = `${party.name} (${party.count})`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading parties:', error);
+            }
+        }
+
+        function setupEventListeners() {
+            // Search
+            const searchInput = document.getElementById('searchFilter');
+            const debouncedSearch = debounce(() => applyFilters(), 300);
+            searchInput.addEventListener('input', debouncedSearch);
+
+            // Filters
+            document.getElementById('partyFilter').addEventListener('change', applyFilters);
+            document.getElementById('provinceFilter').addEventListener('change', applyFilters);
+            document.getElementById('sortFilter').addEventListener('change', applyFilters);
+
+            // Pagination
+            document.getElementById('prevPage').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderLeaders();
+                }
+            });
+
+            document.getElementById('nextPage').addEventListener('click', () => {
+                const totalPages = Math.ceil(filteredLeaders.length / itemsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderLeaders();
+                }
+            });
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
+            const party = document.getElementById('partyFilter').value;
+            const province = document.getElementById('provinceFilter').value;
+            const sort = document.getElementById('sortFilter').value;
+
+            // Filter
+            filteredLeaders = allLeaders.filter(leader => {
+                const matchesSearch = !searchTerm ||
+                    leader.name.toLowerCase().includes(searchTerm) ||
+                    (leader.name_nepali && leader.name_nepali.includes(searchTerm));
+
+                const matchesParty = !party || leader.metadata?.party === party;
+                const matchesProvince = !province || leader.metadata?.province === province;
+
+                return matchesSearch && matchesParty && matchesProvince;
+            });
+
+            // Sort
+            switch (sort) {
+                case 'name':
+                    filteredLeaders.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+                case 'name_desc':
+                    filteredLeaders.sort((a, b) => b.name.localeCompare(a.name));
+                    break;
+                case 'newest':
+                    filteredLeaders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                    break;
+                case 'oldest':
+                    filteredLeaders.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                    break;
+            }
+
+            currentPage = 1;
+            renderLeaders();
+        }
+
+        function renderLeaders() {
+            const grid = document.getElementById('leadersGrid');
+            const resultsInfo = document.getElementById('resultsInfo');
+
+            if (filteredLeaders.length === 0) {
+                showEmptyState(grid, 'No leaders found matching your criteria');
+                resultsInfo.textContent = 'No results found';
+                document.getElementById('pagination').style.display = 'none';
+                return;
+            }
+
+            // Pagination
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredLeaders.length);
+            const pageLeaders = filteredLeaders.slice(startIndex, endIndex);
+
+            // Update results info
+            resultsInfo.textContent = `Showing ${startIndex + 1}-${endIndex} of ${filteredLeaders.length} leaders`;
+
+            // Render grid or list
+            if (currentView === 'grid') {
+                grid.className = 'grid grid-4';
+                grid.innerHTML = pageLeaders.map(leader => renderLeaderCard(leader)).join('');
+            } else {
+                grid.className = 'grid grid-1';
+                grid.innerHTML = pageLeaders.map(leader => renderLeaderListItem(leader)).join('');
+            }
+
+            // Update pagination
+            updatePagination();
+        }
+
+        function renderLeaderCard(leader) {
+            return `
+        <div class="leader-card" onclick="window.location.href='leader-detail.html?id=${leader.id}'">
+          <div class="leader-card-img-container">
+            <img 
+              src="${getImageUrl(leader)}" 
+              alt="${sanitizeHTML(leader.name)}"
+              class="leader-card-img"
+              onerror="this.src='assets/placeholder.jpg'"
+            >
+            ${leader.metadata?.party ? `
+              <span class="leader-card-party-badge ${getPartyBadgeClass(leader.metadata.party)}">
+                ${sanitizeHTML(leader.metadata.party)}
+              </span>
+            ` : ''}
+          </div>
+          <div class="leader-card-body">
+            <h3 class="leader-card-name">${sanitizeHTML(leader.name)}</h3>
+            ${leader.name_nepali ? `<p class="nepali-text" style="color: var(--color-gray); font-size: var(--font-size-sm); margin-bottom: var(--spacing-sm);">${sanitizeHTML(leader.name_nepali)}</p>` : ''}
+            ${leader.metadata?.position ? `<p class="leader-card-position">${sanitizeHTML(leader.metadata.position)}</p>` : ''}
+            ${leader.metadata?.province ? `
+              <div class="leader-card-constituency">
+                📍 ${sanitizeHTML(leader.metadata.province)}
+              </div>
+            ` : ''}
+            ${leader.metadata?.attendance !== undefined ? `
+              <div class="leader-card-stats">
+                <div class="leader-stat">
+                  <span class="leader-stat-value">${leader.metadata.attendance}%</span>
+                  <span class="leader-stat-label">Attendance</span>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+        }
+
+        function renderLeaderListItem(leader) {
+            return `
+        <div class="card" onclick="window.location.href='leader-detail.html?id=${leader.id}'" style="cursor: pointer; padding: var(--spacing-lg); display: flex; gap: var(--spacing-lg); align-items: center;">
+          <img 
+            src="${getImageUrl(leader)}" 
+            alt="${sanitizeHTML(leader.name)}"
+            style="width: 80px; height: 80px; border-radius: var(--radius-lg); object-fit: cover;"
+            onerror="this.src='assets/placeholder.jpg'"
+          >
+          <div style="flex: 1;">
+            <h3 style="margin-bottom: var(--spacing-xs);">${sanitizeHTML(leader.name)}</h3>
+            ${leader.name_nepali ? `<p class="nepali-text" style="color: var(--color-gray); font-size: var(--font-size-sm); margin-bottom: var(--spacing-xs);">${sanitizeHTML(leader.name_nepali)}</p>` : ''}
+            <div style="display: flex; gap: var(--spacing-lg); flex-wrap: wrap;">
+              ${leader.metadata?.party ? `<span class="party-badge ${getPartyBadgeClass(leader.metadata.party)}">${sanitizeHTML(leader.metadata.party)}</span>` : ''}
+              ${leader.metadata?.province ? `<span style="color: var(--color-gray);"><strong>📍</strong> ${sanitizeHTML(leader.metadata.province)}</span>` : ''}
+              ${leader.metadata?.attendance !== undefined ? `<span style="color: var(--color-gray);"><strong>Attendance:</strong> ${leader.metadata.attendance}%</span>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+        }
+
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredLeaders.length / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+            const prevBtn = document.getElementById('prevPage');
+            const nextBtn = document.getElementById('nextPage');
+            const pageInfo = document.getElementById('pageInfo');
+
+            if (totalPages <= 1) {
+                pagination.style.display = 'none';
+                return;
+            }
+
+            pagination.style.display = 'block';
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
+            pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+        }
+
+        function setView(view) {
+            currentView = view;
+            document.getElementById('viewGrid').className = view === 'grid' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+            document.getElementById('viewList').className = view === 'list' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+            renderLeaders();
+        }
+    </script>
+</body>
+
+</html>

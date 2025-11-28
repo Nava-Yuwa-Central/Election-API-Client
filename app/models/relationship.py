@@ -1,7 +1,6 @@
 """Relationship model for connections between entities."""
 
-from sqlalchemy import Column, String, DateTime, Text, ForeignKey, Index
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import Column, String, DateTime, Text, ForeignKey, Index, JSON, Uuid
 from sqlalchemy.sql import func
 import uuid
 
@@ -27,15 +26,15 @@ class Relationship(Base):
 
     __tablename__ = "relationships"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     source_entity_id = Column(
-        UUID(as_uuid=True),
+        Uuid(as_uuid=True),
         ForeignKey("entities.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
     target_entity_id = Column(
-        UUID(as_uuid=True),
+        Uuid(as_uuid=True),
         ForeignKey("entities.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
@@ -43,14 +42,14 @@ class Relationship(Base):
     relationship_type = Column(String(100), nullable=False, index=True)
     description = Column(Text, nullable=True)
     # Use 'meta_data' as Python attribute name, but map to 'metadata' column in DB
-    meta_data = Column("metadata", JSONB, nullable=True, default={})
+    meta_data = Column("metadata", JSON, nullable=True, default={})
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Composite indexes for better query performance
     __table_args__ = (
         Index("ix_relationships_source_target", "source_entity_id", "target_entity_id"),
-        Index("ix_relationships_metadata", meta_data, postgresql_using="gin"),  # Use meta_data here
+        # Index("ix_relationships_metadata", meta_data, postgresql_using="gin"),  # GIN index not supported in SQLite
         Index("ix_relationships_type_created", "relationship_type", created_at.desc()),
     )
 
