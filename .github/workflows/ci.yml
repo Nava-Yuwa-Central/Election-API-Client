@@ -19,26 +19,29 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Cache dependencies
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Cache Poetry dependencies
         uses: actions/cache@v3
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/pyproject.toml') }}
           restore-keys: |
-            ${{ runner.os }}-pip-
+            ${{ runner.os }}-poetry-
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install black isort flake8
-          pip install -r requirements.txt
+          poetry install --with dev
 
       - name: Check formatting with Black
-        run: black --check app/ tests/
+        run: poetry run black --check app/ tests/
         continue-on-error: true
 
       - name: Check import sorting with isort
-        run: isort --check-only app/ tests/
+        run: poetry run isort --check-only app/ tests/
         continue-on-error: true
 
       - name: Lint with flake8
@@ -75,32 +78,35 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Cache dependencies
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Cache Poetry dependencies
         uses: actions/cache@v3
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/pyproject.toml') }}
           restore-keys: |
-            ${{ runner.os }}-pip-
+            ${{ runner.os }}-poetry-
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest pytest-asyncio pytest-cov
+          poetry install
 
       - name: Set up test database
         env:
           DATABASE_URL: postgresql://testuser:testpass@localhost:5432/test_nepal_entity_db
         run: |
-          alembic upgrade head
+          poetry run alembic upgrade head
         continue-on-error: true
 
       - name: Run tests with coverage
         env:
           DATABASE_URL: postgresql://testuser:testpass@localhost:5432/test_nepal_entity_db
         run: |
-          pytest tests/ -v --cov=app --cov-report=xml --cov-report=html
+          poetry run pytest tests/ -v --cov=app --cov-report=xml --cov-report=html
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
@@ -158,9 +164,15 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install safety
-        run: pip install safety
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: |
+          poetry install --only main
 
       - name: Check for security vulnerabilities
-        run: safety check --file requirements.txt --output text
+        run: poetry run safety check --file requirements.txt --output text
         continue-on-error: true
