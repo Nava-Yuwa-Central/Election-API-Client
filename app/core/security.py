@@ -45,15 +45,20 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
-        response.headers["Content-Security-Policy"] = (
+        
+        # VERY PERMISSIVE CSP FOR TESTING
+        # We allow self, data, blobs, and major map providers
+        csp = (
             "default-src 'self'; "
-            "script-src 'self'; "
-            "style-src 'self' 'unsafe-inline'; "
-            "img-src 'self' data: https:; "
-            "font-src 'self'; "
-            "connect-src 'self'; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; "
+            "style-src 'self' 'unsafe-inline' https:; "
+            "img-src 'self' data: https: blob:; "
+            "font-src 'self' https: data:; "
+            "connect-src 'self' https:; "
             "frame-ancestors 'none';"
         )
+        response.headers["Content-Security-Policy"] = csp
+        
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = (
             "geolocation=(), "

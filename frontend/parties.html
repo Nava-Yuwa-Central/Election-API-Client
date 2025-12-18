@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Political Parties - Who's My Neta Nepal</title>
+
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="/frontend/styles/main.css">
+    <link rel="stylesheet" href="/frontend/styles/components.css">
+    <link rel="stylesheet" href="/frontend/styles/animations.css">
+
+    <style>
+        .party-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-xl);
+        }
+
+        .party-card {
+            background: white;
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+            transition: transform 0.2s;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .party-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--color-primary-light);
+        }
+
+        .party-logo-placeholder {
+            width: 80px;
+            height: 80px;
+            background-color: var(--color-gray-light);
+            border-radius: 50%;
+            margin: 0 auto var(--spacing-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .party-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+            color: var(--color-dark);
+        }
+
+        .party-count {
+            color: var(--color-gray);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <span>🇳🇵</span>
+                <span>Who's My Neta Nepal</span>
+            </a>
+
+            <button class="navbar-toggle" id="navbarToggle">☰</button>
+
+            <ul class="navbar-nav" id="navbarNav">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="map.html" class="nav-link">Map</a></li>
+                <li><a href="leaders.html" class="nav-link">Leaders</a></li>
+                <li><a href="parties.html" class="nav-link active">Parties</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <section class="section bg-white">
+        <div class="container text-center">
+            <h1 class="fade-in-down">Political Parties</h1>
+            <p class="text-muted fade-in-up">Overview of political parties and their representatives</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="section" style="padding-top: 0;">
+        <div class="container">
+            <div id="loading" class="text-center">
+                <div class="spinner"></div>
+                <p>Loading parties...</p>
+            </div>
+
+            <div id="partiesGrid" class="party-grid fade-in-up" style="display: none;">
+                <!-- Populated via JS -->
+            </div>
+
+            <div id="emptyState" class="text-center" style="display: none; padding: 40px;">
+                <p>No parties found.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 Who's My Neta Nepal. Open Data Initiative.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/frontend/js/config.js"></script>
+    <script src="/frontend/js/api.js"></script>
+    <script src="/frontend/js/utils.js"></script>
+    <script src="/frontend/js/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const parties = await api.fetchParties();
+                renderParties(parties);
+                document.getElementById('loading').style.display = 'none';
+            } catch (error) {
+                console.error('Error fetching parties:', error);
+                document.getElementById('loading').innerHTML = '<p style="color: red;">Failed to load parties</p>';
+            }
+        });
+
+        function renderParties(parties) {
+            const grid = document.getElementById('partiesGrid');
+
+            if (parties.length === 0) {
+                document.getElementById('emptyState').style.display = 'block';
+                return;
+            }
+
+            // Sort by count descending
+            parties.sort((a, b) => b.count - a.count);
+
+            grid.innerHTML = parties.map(party => `
+                <div class="party-card" onclick="window.location.href='leaders.html?party=${encodeURIComponent(party.name)}'">
+                    <div class="party-logo-placeholder">
+                        <span class="${getPartyBadgeClass(party.name)}">
+                            ${getPartyInitials(party.name)}
+                        </span>
+                    </div>
+                    <div class="party-name">${sanitizeHTML(party.name)}</div>
+                    <div class="party-count">
+                        ${party.count} Representative${party.count !== 1 ? 's' : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            grid.style.display = 'grid';
+        }
+
+        function getPartyInitials(name) {
+            if (!name) return '?';
+            const parts = name.split(/[\s-]/);
+            if (parts.length > 1) {
+                return (parts[0][0] + parts[1][0]).toUpperCase();
+            }
+            return name.substring(0, 2).toUpperCase();
+        }
+    </script>
+</body>
+
+</html>

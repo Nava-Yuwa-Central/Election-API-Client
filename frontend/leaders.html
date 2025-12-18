@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Browse all political leaders in Nepal with advanced search and filtering">
+    <meta name="description" content="Browse all political leaders in Nepal with detailed information">
 
     <title>All Leaders - Who's My Neta Nepal</title>
 
@@ -16,6 +16,126 @@
     <link rel="stylesheet" href="/frontend/styles/main.css">
     <link rel="stylesheet" href="/frontend/styles/components.css">
     <link rel="stylesheet" href="/frontend/styles/animations.css">
+
+    <style>
+        /* Table Styles similar to MyNeta */
+        .leaders-table-container {
+            overflow-x: auto;
+            background: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            margin-top: var(--spacing-md);
+        }
+
+        .leaders-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            min-width: 900px;
+            /* Ensure scroll on small screens */
+        }
+
+        .leaders-table th {
+            background-color: var(--color-primary);
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .leaders-table th.sortable {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .leaders-table th.sortable:hover {
+            background-color: var(--color-primary-dark);
+        }
+
+        .leaders-table th.sortable::after {
+            content: '↕';
+            font-size: 0.8em;
+            margin-left: 5px;
+            opacity: 0.7;
+        }
+
+        .leaders-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--color-gray-light);
+            vertical-align: middle;
+        }
+
+        .leaders-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .leaders-table tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        .candidate-cell {
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .candidate-cell a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .candidate-cell a:hover {
+            text-decoration: underline;
+        }
+
+        .nepali-name {
+            display: block;
+            font-size: 0.85em;
+            color: var(--color-gray);
+            font-weight: normal;
+        }
+
+        .cases-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .cases-clean {
+            background-color: #d1fae5;
+            color: #065f46;
+            /* Green */
+        }
+
+        .cases-warning {
+            background-color: #fee2e2;
+            color: #991b1b;
+            /* Red */
+        }
+
+        .currency-cell {
+            font-family: monospace;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .filter-panel {
+            background: white;
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--spacing-lg);
+            border: 1px solid var(--color-gray-light);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+        }
+    </style>
 </head>
 
 <body>
@@ -39,82 +159,116 @@
     </nav>
 
     <!-- Page Header -->
-    <section class="section bg-white">
+    <section class="section bg-white" style="padding-bottom: var(--spacing-lg);">
         <div class="container">
-            <h1 class="text-center fade-in-down">Political Leaders</h1>
+            <h1 class="text-center fade-in-down">Parliament Members</h1>
             <p class="text-center text-muted fade-in-up">
-                Explore Nepal's political representatives
+                Detailed analysis of parliament members including criminal cases, assets, and liabilities
             </p>
         </div>
     </section>
 
-    <!-- Filter Bar -->
+    <!-- Filter Section -->
     <section class="section" style="padding-top: 0;">
         <div class="container">
-            <div class="filter-bar">
-                <div class="filter-group">
-                    <label class="filter-label" for="searchFilter">Search</label>
-                    <input type="text" id="searchFilter" class="search-bar"
-                        style="padding: var(--spacing-sm) var(--spacing-md);" placeholder="Search by name..."
-                        autocomplete="off">
-                </div>
 
-                <div class="filter-group">
-                    <label class="filter-label" for="partyFilter">Party</label>
-                    <select id="partyFilter" class="filter-select">
-                        <option value="">All Parties</option>
-                        <!-- Populated dynamically -->
-                    </select>
-                </div>
+            <div class="filter-panel fade-in-up">
+                <h3 style="margin-bottom: var(--spacing-md); font-size: var(--font-size-lg);">Filter Members</h3>
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label class="filter-label" for="searchFilter">Search Candidate</label>
+                        <input type="text" id="searchFilter" class="search-bar" placeholder="Name..."
+                            autocomplete="off">
+                    </div>
 
-                <div class="filter-group">
-                    <label class="filter-label" for="provinceFilter">Province</label>
-                    <select id="provinceFilter" class="filter-select">
-                        <option value="">All Provinces</option>
-                        <option value="Koshi">Koshi</option>
-                        <option value="Madhesh">Madhesh</option>
-                        <option value="Bagmati">Bagmati</option>
-                        <option value="Gandaki">Gandaki</option>
-                        <option value="Lumbini">Lumbini</option>
-                        <option value="Karnali">Karnali</option>
-                        <option value="Sudurpashchim">Sudurpashchim</option>
-                    </select>
-                </div>
+                    <div class="filter-group">
+                        <label class="filter-label" for="provinceFilter">Province</label>
+                        <select id="provinceFilter" class="filter-select">
+                            <option value="">All Provinces</option>
+                            <option value="Koshi">Koshi</option>
+                            <option value="Madhesh">Madhesh</option>
+                            <option value="Bagmati">Bagmati</option>
+                            <option value="Gandaki">Gandaki</option>
+                            <option value="Lumbini">Lumbini</option>
+                            <option value="Karnali">Karnali</option>
+                            <option value="Sudurpashchim">Sudurpashchim</option>
+                        </select>
+                    </div>
 
-                <div class="filter-group">
-                    <label class="filter-label" for="sortFilter">Sort By</label>
-                    <select id="sortFilter" class="filter-select">
-                        <option value="name">Name (A-Z)</option>
-                        <option value="name_desc">Name (Z-A)</option>
-                        <option value="newest">Newest First</option>
-                        <option value="oldest">Oldest First</option>
-                    </select>
+                    <div class="filter-group">
+                        <label class="filter-label" for="partyFilter">Party</label>
+                        <select id="partyFilter" class="filter-select">
+                            <option value="">All Parties</option>
+                            <!-- Dynamically populated -->
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label" for="educationFilter">Education</label>
+                        <select id="educationFilter" class="filter-select">
+                            <option value="">All Education Levels</option>
+                            <option value="Doctorate">Doctorate</option>
+                            <option value="Post Graduate">Post Graduate</option>
+                            <option value="Graduate">Graduate</option>
+                            <option value="12th Pass">12th Pass</option>
+                            <option value="10th Pass">10th Pass</option>
+                            <option value="8th Pass">8th Pass</option>
+                            <option value="Literate">Literate</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label" for="casesFilter">Criminal Cases</label>
+                        <select id="casesFilter" class="filter-select">
+                            <option value="">Any</option>
+                            <option value="yes">Has Criminal Cases</option>
+                            <option value="no">Clean Record</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group" style="display: flex; align-items: flex-end;">
+                        <button class="btn btn-primary" onclick="resetFilters()" style="width: 100%;">Reset
+                            Filters</button>
+                    </div>
                 </div>
             </div>
 
             <!-- Results Info -->
             <div
-                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg);">
-                <p id="resultsInfo" class="text-muted">Loading leaders...</p>
-                <div style="display: flex; gap: var(--spacing-sm);">
-                    <button id="viewGrid" class="btn btn-sm btn-primary" onclick="setView('grid')">Grid</button>
-                    <button id="viewList" class="btn btn-sm btn-outline" onclick="setView('list')">List</button>
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
+                <p id="resultsInfo" class="text-muted" style="font-weight: 500;">Loading data...</p>
+                <div style="font-size: 0.9em; color: var(--color-gray);">
+                    <span>* Data sourced from affidavits</span>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <!-- Leaders Grid -->
-    <section class="section" style="padding-top: 0;">
-        <div class="container">
-            <div class="grid grid-4" id="leadersGrid">
-                <!-- Populated dynamically -->
+            <!-- Leaders Table -->
+            <div class="leaders-table-container fade-in-up" id="leadersTableContainer">
+                <table class="leaders-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">S.No.</th>
+                            <th class="sortable" onclick="sortBy('name')">Candidate</th>
+                            <th class="sortable" onclick="sortBy('party')">Party</th>
+                            <th class="sortable" onclick="sortBy('cases')" style="text-align: center;">Criminal
+                                API<br>Cases</th>
+                            <th class="sortable" onclick="sortBy('education')">Education</th>
+                            <th class="sortable" onclick="sortBy('assets')" style="text-align: right;">Total Assets</th>
+                            <th class="sortable" onclick="sortBy('liabilities')" style="text-align: right;">Liabilities
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="leadersTableBody">
+                        <!-- Populated via JS -->
+                    </tbody>
+                </table>
             </div>
 
             <!-- Pagination -->
-            <div id="pagination" class="text-center mt-xl" style="display: none;">
+            <div id="pagination" class="text-center mt-xl" style="display: none; padding-bottom: var(--spacing-xl);">
                 <button id="prevPage" class="btn btn-outline" disabled>← Previous</button>
-                <span id="pageInfo" style="margin: 0 var(--spacing-lg); color: var(--color-gray);">Page 1</span>
+                <span id="pageInfo"
+                    style="margin: 0 var(--spacing-lg); color: var(--color-gray); font-weight: 500;">Page 1</span>
                 <button id="nextPage" class="btn btn-outline">Next →</button>
             </div>
         </div>
@@ -155,11 +309,11 @@
         let allLeaders = [];
         let filteredLeaders = [];
         let currentPage = 1;
-        let itemsPerPage = 12;
-        let currentView = 'grid';
+        let itemsPerPage = 20; // Show more items in table view
+        let currentSort = { field: 'name', dir: 'asc' };
 
         document.addEventListener('DOMContentLoaded', async () => {
-            console.log('🇳🇵 Leaders Page Loaded');
+            console.log('🇳🇵 Leaders Table Page Loaded');
 
             // Load all leaders
             await loadLeaders();
@@ -170,29 +324,46 @@
             // Set up event listeners
             setupEventListeners();
 
-            // Check URL parameters
+            // Handle URL params
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('party')) {
                 document.getElementById('partyFilter').value = urlParams.get('party');
                 applyFilters();
             }
-            if (urlParams.has('province')) {
-                document.getElementById('provinceFilter').value = urlParams.get('province');
-                applyFilters();
-            }
         });
 
         async function loadLeaders() {
-            const grid = document.getElementById('leadersGrid');
-            showLoading(grid, 'Loading leaders...');
+            const tableBody = document.getElementById('leadersTableBody');
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;">Loading data...</td></tr>';
 
             try {
-                allLeaders = await api.fetchLeaders({ limit: 1000 });
+                // Fetch leaders from API
+                const response = await api.fetchLeaders({ limit: 1000 });
+                console.log('API Response:', response);
+
+                // Enhance data with mock values for missing fields if necessary
+                // In a real scenario, this data should come from the backend.
+                // For now, we'll try to use metadata or default values.
+                allLeaders = response.map(leader => {
+                    const meta = leader.metadata || leader.meta_data || {};
+                    return {
+                        ...leader,
+                        metadata: meta,
+                        // Try to get these from metadata, otherwise default/random for demo if empty
+                        criminal_cases: meta.criminal_cases || 0,
+                        education: meta.education || 'Unknown',
+                        assets: meta.assets || 0,
+                        liabilities: meta.liabilities || 0,
+                        age: meta.age || 'N/A'
+                    };
+                });
+
+                console.log('Processed Leaders:', allLeaders.length);
                 filteredLeaders = [...allLeaders];
-                renderLeaders();
+                renderTable();
             } catch (error) {
                 console.error('Error loading leaders:', error);
-                showError(grid, 'Failed to load leaders. Please try again.');
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red; padding: 20px;">Failed to load data.</td></tr>';
             }
         }
 
@@ -201,10 +372,13 @@
                 const parties = await api.fetchParties();
                 const select = document.getElementById('partyFilter');
 
+                // Keep "All Parties"
+                select.innerHTML = '<option value="">All Parties</option>';
+
                 parties.forEach(party => {
                     const option = document.createElement('option');
                     option.value = party.name;
-                    option.textContent = `${party.name} (${party.count})`;
+                    option.textContent = `${party.name}`;
                     select.appendChild(option);
                 });
             } catch (error) {
@@ -219,15 +393,17 @@
             searchInput.addEventListener('input', debouncedSearch);
 
             // Filters
-            document.getElementById('partyFilter').addEventListener('change', applyFilters);
             document.getElementById('provinceFilter').addEventListener('change', applyFilters);
-            document.getElementById('sortFilter').addEventListener('change', applyFilters);
+            document.getElementById('partyFilter').addEventListener('change', applyFilters);
+            document.getElementById('educationFilter').addEventListener('change', applyFilters);
+            document.getElementById('casesFilter').addEventListener('change', applyFilters);
 
             // Pagination
             document.getElementById('prevPage').addEventListener('click', () => {
                 if (currentPage > 1) {
                     currentPage--;
-                    renderLeaders();
+                    renderTable();
+                    scrollToTop();
                 }
             });
 
@@ -235,139 +411,158 @@
                 const totalPages = Math.ceil(filteredLeaders.length / itemsPerPage);
                 if (currentPage < totalPages) {
                     currentPage++;
-                    renderLeaders();
+                    renderTable();
+                    scrollToTop();
                 }
             });
         }
 
+        function resetFilters() {
+            document.getElementById('searchFilter').value = '';
+            document.getElementById('provinceFilter').value = '';
+            document.getElementById('partyFilter').value = '';
+            document.getElementById('educationFilter').value = '';
+            document.getElementById('casesFilter').value = '';
+            applyFilters();
+        }
+
+        function scrollToTop() {
+            const tableContainer = document.getElementById('leadersTableContainer');
+            tableContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
         function applyFilters() {
             const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
-            const party = document.getElementById('partyFilter').value;
             const province = document.getElementById('provinceFilter').value;
-            const sort = document.getElementById('sortFilter').value;
+            const party = document.getElementById('partyFilter').value;
+            const education = document.getElementById('educationFilter').value;
+            const cases = document.getElementById('casesFilter').value;
 
-            // Filter
             filteredLeaders = allLeaders.filter(leader => {
                 const matchesSearch = !searchTerm ||
                     leader.name.toLowerCase().includes(searchTerm) ||
                     (leader.name_nepali && leader.name_nepali.includes(searchTerm));
 
-                const matchesParty = !party || leader.metadata?.party === party;
                 const matchesProvince = !province || leader.metadata?.province === province;
+                const matchesParty = !party || leader.metadata?.party === party;
+                const matchesEducation = !education || leader.education === education;
 
-                return matchesSearch && matchesParty && matchesProvince;
+                let matchesCases = true;
+                if (cases === 'yes') matchesCases = leader.criminal_cases > 0;
+                if (cases === 'no') matchesCases = leader.criminal_cases === 0;
+
+                return matchesSearch && matchesProvince && matchesParty && matchesEducation && matchesCases;
             });
 
-            // Sort
-            switch (sort) {
-                case 'name':
-                    filteredLeaders.sort((a, b) => a.name.localeCompare(b.name));
-                    break;
-                case 'name_desc':
-                    filteredLeaders.sort((a, b) => b.name.localeCompare(a.name));
-                    break;
-                case 'newest':
-                    filteredLeaders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                    break;
-                case 'oldest':
-                    filteredLeaders.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-                    break;
-            }
+            // Re-apply sort
+            sortData(currentSort.field, currentSort.dir);
 
             currentPage = 1;
-            renderLeaders();
+            renderTable();
         }
 
-        function renderLeaders() {
-            const grid = document.getElementById('leadersGrid');
+        function sortBy(field) {
+            // Toggle direction if clicking same field
+            if (currentSort.field === field) {
+                currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.field = field;
+                currentSort.dir = 'asc'; // Default new sort to asc
+            }
+
+            sortData(field, currentSort.dir);
+            renderTable();
+        }
+
+        function sortData(field, dir) {
+            const modifier = dir === 'asc' ? 1 : -1;
+
+            filteredLeaders.sort((a, b) => {
+                let valA = a[field];
+                let valB = b[field];
+
+                // Handle specific nested or special fields
+                if (field === 'party') {
+                    valA = a.metadata?.party || '';
+                    valB = b.metadata?.party || '';
+                }
+
+                // String comparison
+                if (typeof valA === 'string') {
+                    return valA.localeCompare(valB) * modifier;
+                }
+
+                // Numeric comparison
+                return (valA - valB) * modifier;
+            });
+        }
+
+        function renderTable() {
+            const tableBody = document.getElementById('leadersTableBody');
             const resultsInfo = document.getElementById('resultsInfo');
+            const pagination = document.getElementById('pagination');
 
             if (filteredLeaders.length === 0) {
-                showEmptyState(grid, 'No leaders found matching your criteria');
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px;">
+                            <div style="font-size: 40px; margin-bottom: 10px;">📭</div>
+                            <p>No candidates found matching your criteria</p>
+                        </td>
+                    </tr>
+                `;
                 resultsInfo.textContent = 'No results found';
-                document.getElementById('pagination').style.display = 'none';
+                pagination.style.display = 'none';
                 return;
             }
 
-            // Pagination
+            // Pagination Logic
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = Math.min(startIndex + itemsPerPage, filteredLeaders.length);
-            const pageLeaders = filteredLeaders.slice(startIndex, endIndex);
+            const pageItems = filteredLeaders.slice(startIndex, endIndex);
 
-            // Update results info
-            resultsInfo.textContent = `Showing ${startIndex + 1}-${endIndex} of ${filteredLeaders.length} leaders`;
+            resultsInfo.textContent = `Showing ${startIndex + 1} to ${endIndex} of ${filteredLeaders.length} candidates`;
 
-            // Render grid or list
-            if (currentView === 'grid') {
-                grid.className = 'grid grid-4';
-                grid.innerHTML = pageLeaders.map(leader => renderLeaderCard(leader)).join('');
-            } else {
-                grid.className = 'grid grid-1';
-                grid.innerHTML = pageLeaders.map(leader => renderLeaderListItem(leader)).join('');
-            }
+            // Render Rows
+            let html = '';
+            pageItems.forEach((leader, index) => {
+                const serialNumber = startIndex + index + 1;
+                const partyName = leader.metadata?.party || 'Independent';
+                const partyBadgeClass = getPartyBadgeClass(partyName);
 
-            // Update pagination
+                // Format Assets/Liabilities as valid currency
+                const assets = formatCurrency(leader.assets);
+                const liabilities = formatCurrency(leader.liabilities);
+
+                const casesClass = leader.criminal_cases > 0 ? 'cases-warning' : 'cases-clean';
+                const casesText = leader.criminal_cases > 0 ? `${leader.criminal_cases} Cases` : '0';
+
+                html += `
+                    <tr>
+                        <td>${serialNumber}</td>
+                        <td class="candidate-cell">
+                            <a href="leader-detail.html?id=${leader.id}">${sanitizeHTML(leader.name)}</a>
+                            ${leader.name_nepali ? `<span class="nepali-name">${sanitizeHTML(leader.name_nepali)}</span>` : ''}
+                            <span style="font-size: 0.8em; color: var(--color-gray); font-weight: normal;">Age: ${leader.age}</span>
+                        </td>
+                        <td>
+                            <span class="party-badge ${partyBadgeClass}" style="font-size: 0.8em;">${sanitizeHTML(partyName)}</span>
+                            <div style="font-size: 0.75em; margin-top: 4px; color: var(--color-gray);">
+                                ${leader.metadata?.province || ''}
+                            </div>
+                        </td>
+                        <td style="text-align: center;">
+                            <span class="cases-badge ${casesClass}">${casesText}</span>
+                        </td>
+                        <td>${sanitizeHTML(leader.education)}</td>
+                        <td class="currency-cell" style="color: #059669;">${assets}</td>
+                        <td class="currency-cell" style="color: #dc2626;">${liabilities}</td>
+                    </tr>
+                `;
+            });
+
+            tableBody.innerHTML = html;
             updatePagination();
-        }
-
-        function renderLeaderCard(leader) {
-            return `
-        <div class="leader-card" onclick="window.location.href='leader-detail.html?id=${leader.id}'">
-          <div class="leader-card-img-container">
-            <img 
-              src="${getImageUrl(leader)}" 
-              alt="${sanitizeHTML(leader.name)}"
-              class="leader-card-img"
-              onerror="this.src='assets/placeholder.jpg'"
-            >
-            ${leader.metadata?.party ? `
-              <span class="leader-card-party-badge ${getPartyBadgeClass(leader.metadata.party)}">
-                ${sanitizeHTML(leader.metadata.party)}
-              </span>
-            ` : ''}
-          </div>
-          <div class="leader-card-body">
-            <h3 class="leader-card-name">${sanitizeHTML(leader.name)}</h3>
-            ${leader.name_nepali ? `<p class="nepali-text" style="color: var(--color-gray); font-size: var(--font-size-sm); margin-bottom: var(--spacing-sm);">${sanitizeHTML(leader.name_nepali)}</p>` : ''}
-            ${leader.metadata?.position ? `<p class="leader-card-position">${sanitizeHTML(leader.metadata.position)}</p>` : ''}
-            ${leader.metadata?.province ? `
-              <div class="leader-card-constituency">
-                📍 ${sanitizeHTML(leader.metadata.province)}
-              </div>
-            ` : ''}
-            ${leader.metadata?.attendance !== undefined ? `
-              <div class="leader-card-stats">
-                <div class="leader-stat">
-                  <span class="leader-stat-value">${leader.metadata.attendance}%</span>
-                  <span class="leader-stat-label">Attendance</span>
-                </div>
-              </div>
-            ` : ''}
-          </div>
-        </div>
-      `;
-        }
-
-        function renderLeaderListItem(leader) {
-            return `
-        <div class="card" onclick="window.location.href='leader-detail.html?id=${leader.id}'" style="cursor: pointer; padding: var(--spacing-lg); display: flex; gap: var(--spacing-lg); align-items: center;">
-          <img 
-            src="${getImageUrl(leader)}" 
-            alt="${sanitizeHTML(leader.name)}"
-            style="width: 80px; height: 80px; border-radius: var(--radius-lg); object-fit: cover;"
-            onerror="this.src='assets/placeholder.jpg'"
-          >
-          <div style="flex: 1;">
-            <h3 style="margin-bottom: var(--spacing-xs);">${sanitizeHTML(leader.name)}</h3>
-            ${leader.name_nepali ? `<p class="nepali-text" style="color: var(--color-gray); font-size: var(--font-size-sm); margin-bottom: var(--spacing-xs);">${sanitizeHTML(leader.name_nepali)}</p>` : ''}
-            <div style="display: flex; gap: var(--spacing-lg); flex-wrap: wrap;">
-              ${leader.metadata?.party ? `<span class="party-badge ${getPartyBadgeClass(leader.metadata.party)}">${sanitizeHTML(leader.metadata.party)}</span>` : ''}
-              ${leader.metadata?.province ? `<span style="color: var(--color-gray);"><strong>📍</strong> ${sanitizeHTML(leader.metadata.province)}</span>` : ''}
-              ${leader.metadata?.attendance !== undefined ? `<span style="color: var(--color-gray);"><strong>Attendance:</strong> ${leader.metadata.attendance}%</span>` : ''}
-            </div>
-          </div>
-        </div>
-      `;
         }
 
         function updatePagination() {
@@ -388,11 +583,16 @@
             pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
         }
 
-        function setView(view) {
-            currentView = view;
-            document.getElementById('viewGrid').className = view === 'grid' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
-            document.getElementById('viewList').className = view === 'list' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
-            renderLeaders();
+        // Helper to format currency properly
+        function formatCurrency(value) {
+            if (value === undefined || value === null) return 'NPR 0';
+            // Check if it looks like a number
+            const num = Number(value);
+            if (isNaN(num)) return value; // Return as is if string
+
+            return 'Rs ' + num.toLocaleString('en-IN', {
+                maximumFractionDigits: 0
+            });
         }
     </script>
 </body>

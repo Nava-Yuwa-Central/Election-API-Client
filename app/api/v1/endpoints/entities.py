@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_, func
+from sqlalchemy import select, or_, func, text
 from typing import List, Optional
 from uuid import UUID
 import logging
@@ -93,6 +93,7 @@ async def list_entities(
         query = select(Entity).order_by(Entity.created_at.desc())
 
         if entity_type:
+            logger.info(f"Filtering by entity_type: {entity_type} (value: {entity_type.value})")
             query = query.where(Entity.entity_type == entity_type)
 
         if search:
@@ -111,6 +112,11 @@ async def list_entities(
         logger.info(f"Retrieved {len(entities)} entities")
         return entities
     except Exception as e:
+        import traceback
+        with open("error_log.txt", "w") as f:
+            f.write(str(e))
+            f.write("\n")
+            traceback.print_exc(file=f)
         logger.error(f"Error listing entities: {str(e)}")
         raise DatabaseError(f"Failed to list entities: {str(e)}")
 
@@ -139,10 +145,18 @@ async def get_entity(
         DatabaseError: If database operation fails
     """
     try:
-        result = await db.execute(select(Entity).where(Entity.id == entity_id))
+        # Debug logging
+        logger.info(f"Looking for entity with ID: {entity_id}")
+        print(f"DEBUG: Looking for entity with ID: {entity_id}")
+        
+        # Use raw SQL text for comparison to bypass potential SQLAlchemy UUID casting issues
+        result = await db.execute(select(Entity).where(text("id = :uid")).params(uid=str(entity_id)))
         entity = result.scalar_one_or_none()
+        
+        print(f"DEBUG: Query result for {entity_id}: {entity}")
 
         if not entity:
+            print(f"DEBUG: Entity not found in DB: {entity_id}")
             logger.warning(f"Entity not found: {entity_id}")
             raise EntityNotFoundError(str(entity_id))
 
@@ -151,6 +165,8 @@ async def get_entity(
     except EntityNotFoundError:
         raise
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         logger.error(f"Error getting entity: {str(e)}")
         raise DatabaseError(f"Failed to get entity: {str(e)}")
 

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leader Details - Who's My Neta Nepal</title>
+
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="/frontend/styles/main.css">
+    <link rel="stylesheet" href="/frontend/styles/components.css">
+    <link rel="stylesheet" href="/frontend/styles/animations.css">
+
+    <style>
+        :root {
+            --color-header-bg: #1a56db;
+            /* Royal Blue */
+        }
+
+        .leader-header-section {
+            background-color: var(--color-header-bg);
+            color: white;
+            padding: var(--spacing-3xl) 0;
+            margin-top: -20px;
+            /* Offset default nav margin/padding if any */
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xl);
+        }
+
+        .header-profile-img {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            object-fit: cover;
+            background-color: white;
+        }
+
+        .header-info h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-xs);
+            color: white;
+            /* Ensure title is white */
+        }
+
+        .header-info .party-name {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-lg);
+            color: var(--color-dark);
+            border-bottom: 2px solid var(--color-gray-light);
+            padding-bottom: var(--spacing-sm);
+        }
+
+        /* Personal Info Grid */
+        .personal-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-xl);
+            margin-bottom: var(--spacing-3xl);
+        }
+
+        .info-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .info-label {
+            display: block;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-gray);
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--color-dark);
+        }
+
+        .biography-text {
+            color: var(--color-dark);
+            line-height: 1.8;
+            font-size: 1rem;
+        }
+
+        /* Render HTML content in bio safely */
+        .biography-text p {
+            margin-bottom: 1em;
+        }
+
+        .biography-text ul {
+            margin-left: 1.5em;
+            margin-bottom: 1em;
+        }
+
+        /* Election History Card */
+        .election-history-card {
+            background: white;
+            border: 1px solid var(--color-gray-light);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .election-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .election-sub {
+            color: var(--color-gray);
+            font-size: 0.9rem;
+        }
+
+        .election-result-badge {
+            padding: var(--spacing-xs) var(--spacing-md);
+            background-color: #d1fae5;
+            color: #065f46;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .personal-info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <span>🇳🇵</span>
+                <span>Who's My Neta Nepal</span>
+            </a>
+            <button class="navbar-toggle" id="navbarToggle">☰</button>
+            <ul class="navbar-nav" id="navbarNav">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="map.html" class="nav-link">Map</a></li>
+                <li><a href="leaders.html" class="nav-link">Leaders</a></li>
+                <li><a href="parties.html" class="nav-link">Parties</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div id="loading" class="text-center" style="padding: 100px;">
+        <div class="spinner"></div>
+        <p>Loading leader details...</p>
+    </div>
+
+    <div id="errorState" class="text-center" style="display: none; padding: 100px;">
+        <h2 style="color: var(--color-danger);">Leader Not Found</h2>
+        <p class="text-muted">The leader you are looking for does not exist.</p>
+        <a href="leaders.html" class="btn btn-primary mt-lg">Browse All Leaders</a>
+    </div>
+
+    <div id="leaderContent" style="display: none;">
+        <!-- Header Section -->
+        <section class="leader-header-section">
+            <div class="container header-content">
+                <img id="headerImage" src="assets/placeholder.jpg" alt="Leader" class="header-profile-img">
+                <div class="header-info">
+                    <h1 id="headerName">Leader Name</h1>
+                    <div id="headerParty" class="party-name">Party Name</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" style="padding-top: 0;">
+            <div class="container">
+                <h2 class="section-title">Personal Information</h2>
+
+                <div class="personal-info-grid">
+                    <!-- Column 1 -->
+                    <div>
+                        <div class="info-group">
+                            <span class="info-label">Date of Birth / Age</span>
+                            <div class="info-value" id="valDob">N/A</div>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Gender</span>
+                            <div class="info-value" id="valGender">Male</div>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Education</span>
+                            <div class="info-value" id="valEducation">Unknown</div>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Occupation</span>
+                            <div class="info-value" id="valOccupation">Politician</div>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Address</span>
+                            <div class="info-value" id="valAddress">-</div>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Father's Name</span>
+                            <div class="info-value" id="valFather">-</div>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Spouse's Name</span>
+                            <div class="info-value" id="valSpouse">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2 -->
+                    <div>
+                        <div class="info-group">
+                            <span class="info-label">Assets</span>
+                            <div class="info-value" id="valAssets">NPR 0</div>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Liabilities</span>
+                            <div class="info-value" id="valLiabilities">NPR 0</div>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Criminal Cases</span>
+                            <div class="info-value" id="valCases">0</div>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Biography</span>
+                            <div class="info-value biography-text" id="valBio">
+                                No biography available.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="section-title">Election History</h2>
+                <div class="election-history-card">
+                    <div class="election-info">
+                        <h4 id="histConstituency">Unknown Constituency (2079)</h4>
+                        <div class="election-sub" id="histParty">Independent</div>
+                    </div>
+                    <div>
+                        <!-- Placeholder votes -->
+                        <div class="text-right" style="font-weight: bold; margin-bottom: 5px;">Winner</div>
+                        <div class="election-result-badge">Elected</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 Who's My Neta Nepal. Open Data Initiative.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/frontend/js/config.js"></script>
+    <script src="/frontend/js/api.js"></script>
+    <script src="/frontend/js/utils.js"></script>
+    <script src="/frontend/js/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const leaderId = urlParams.get('id');
+
+            if (!leaderId) {
+                window.location.href = 'leaders.html';
+                return;
+            }
+
+            try {
+                const leader = await api.fetchLeaderById(leaderId);
+                renderLeaderDetails(leader);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('leaderContent').style.display = 'block';
+            } catch (error) {
+                console.error('Error fetching leader:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('errorState').style.display = 'block';
+            }
+        });
+
+        function renderLeaderDetails(leader) {
+            document.title = `${leader.name} - Who's My Neta Nepal`;
+
+            const meta = leader.metadata || {};
+
+            // Header
+            document.getElementById('headerName').textContent = leader.name;
+            document.getElementById('headerParty').textContent = meta.party || 'Independent';
+
+            if (meta.photo_url) {
+                document.getElementById('headerImage').src = getImageUrl(leader);
+            }
+
+            // Info
+            document.getElementById('valDob').textContent = `${meta.dob || 'Unknown'} (${meta.age || 'N/A'} years)`;
+            document.getElementById('valGender').textContent = 'Male'; // Default or map if available
+            document.getElementById('valEducation').textContent = meta.education || 'Unknown';
+            // document.getElementById('valOccupation').textContent = 'Politician'; // Static for now
+
+            const address = [];
+            if (meta.district) address.push(meta.district);
+            if (meta.province) address.push(meta.province);
+            document.getElementById('valAddress').textContent = address.join(', ') || 'Nepal';
+
+            // Financials
+            document.getElementById('valAssets').textContent = formatCurrency(meta.assets);
+            document.getElementById('valLiabilities').textContent = formatCurrency(meta.liabilities);
+            document.getElementById('valCases').textContent = meta.criminal_cases || 0;
+
+            // Bio
+            // Leader description often contains HTML from seed.
+            const bioEl = document.getElementById('valBio');
+            if (leader.description) {
+                // Simple check to see if it's HTML-like
+                if (leader.description.includes('<') && leader.description.includes('>')) {
+                    bioEl.innerHTML = leader.description;
+                } else {
+                    bioEl.textContent = leader.description;
+                }
+            } else {
+                bioEl.textContent = "No biography available.";
+            }
+
+            // Election History Mockup (Dynamic parts)
+            document.getElementById('histConstituency').textContent = `${meta.district || 'Unknown'} (2079)`;
+            document.getElementById('histParty').textContent = meta.party || 'Independent';
+        }
+
+        function formatCurrency(value) {
+            if (value === undefined || value === null) return 'NPR 0';
+            const num = Number(value);
+            return isNaN(num) ? value : 'NPR ' + num.toLocaleString('en-IN');
+        }
+    </script>
+</body>
+
+</html>

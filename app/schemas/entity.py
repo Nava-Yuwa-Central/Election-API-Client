@@ -1,7 +1,7 @@
 """Pydantic schemas for Entity endpoints."""
 
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Union
 from datetime import datetime
 from uuid import UUID
 import bleach
@@ -29,7 +29,7 @@ class EntityBase(BaseModel):
         ..., description="Type of entity", examples=["government", "person"]
     )
     description: Optional[str] = Field(
-        None, max_length=5000, description="Detailed description of the entity"
+        None, max_length=50000, description="Detailed description of the entity"
     )
     metadata: Optional[Dict[str, Any]] = Field(
         default_factory=dict, description="Additional metadata in JSON format"
@@ -96,7 +96,7 @@ class EntityUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     name_nepali: Optional[str] = Field(None, max_length=255)
     entity_type: Optional[EntityType] = None
-    description: Optional[str] = Field(None, max_length=5000)
+    description: Optional[str] = Field(None, max_length=50000)
     metadata: Optional[Dict[str, Any]] = None
 
     @field_validator("description")
@@ -139,11 +139,24 @@ class EntityResponse(EntityBase):
     updated_at: Optional[datetime] = Field(None, description="Last update timestamp")
     version: str = Field(..., description="Entity version")
     # Map 'meta_data' from model to 'metadata' in response
-    metadata: Optional[Dict[str, Any]] = Field(
+    # Map 'meta_data' from model to 'metadata' in response
+    metadata: Optional[Union[Dict[str, Any], str]] = Field(
         default_factory=dict,
         alias="meta_data",  # Read from model's meta_data attribute
         description="Additional metadata in JSON format"
     )
+
+    @field_validator("metadata", mode="before")
+    @classmethod
+    def parse_metadata_json(cls, v: Any) -> Dict[str, Any]:
+        """Parse JSON string if metadata comes as string."""
+        if isinstance(v, str):
+            try:
+                import json
+                return json.loads(v)
+            except Exception:
+                return {}
+        return v
 
     class Config:
         from_attributes = True

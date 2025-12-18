@@ -110,7 +110,7 @@
     <div class="container">
       <h2 class="text-center mb-xl scroll-reveal">Featured Leaders</h2>
 
-      <div class="grid grid-4" id="featuredLeadersGrid">
+      <div class="grid grid-3" id="featuredLeadersGrid">
         <!-- Loading state -->
         <div class="skeleton skeleton-img"></div>
         <div class="skeleton skeleton-img"></div>
@@ -204,7 +204,7 @@
 
       // Load featured leaders
       try {
-        const leaders = await api.fetchLeaders({ limit: 4 });
+        const leaders = await api.fetchLeaders({ limit: 24 });
         renderFeaturedLeaders(leaders);
       } catch (error) {
         console.error('Error loading featured leaders:', error);
@@ -263,29 +263,17 @@
       }
 
       grid.innerHTML = leaders.map(leader => `
-        <div class="leader-card scroll-reveal" onclick="window.location.href='leader-detail.html?id=${leader.id}'">
-          <div class="leader-card-img-container">
-            <img 
-              src="${getImageUrl(leader)}" 
-              alt="${sanitizeHTML(leader.name)}"
-              class="leader-card-img"
-              onerror="this.src='assets/placeholder.jpg'"
-            >
-            ${leader.metadata?.party ? `
-              <span class="leader-card-party-badge ${getPartyBadgeClass(leader.metadata.party)}">
-                ${sanitizeHTML(leader.metadata.party)}
-              </span>
-            ` : ''}
-          </div>
-          <div class="leader-card-body">
-            <h3 class="leader-card-name">${sanitizeHTML(leader.name)}</h3>
-            ${leader.name_nepali ? `<p class="nepali-text" style="color: var(--color-gray); font-size: var(--font-size-sm); margin-bottom: var(--spacing-sm);">${sanitizeHTML(leader.name_nepali)}</p>` : ''}
-            ${leader.metadata?.position ? `<p class="leader-card-position">${sanitizeHTML(leader.metadata.position)}</p>` : ''}
-            ${leader.metadata?.province ? `
-              <div class="leader-card-constituency">
-                📍 ${sanitizeHTML(leader.metadata.province)}
-              </div>
-            ` : ''}
+        <div class="leader-compact-card scroll-reveal" onclick="window.location.href='leader-detail.html?id=${leader.id}'">
+          <img 
+            src="${getImageUrl(leader)}" 
+            alt="${sanitizeHTML(leader.name)}"
+            class="leader-compact-img"
+            onerror="this.src='assets/placeholder.jpg'"
+          >
+          <div class="leader-compact-info">
+            <h3 class="leader-compact-name">${sanitizeHTML(leader.name)}</h3>
+             ${leader.metadata?.party ? `<p class="leader-compact-meta" style="color: ${getPartyColor(leader.metadata.party)}">${sanitizeHTML(leader.metadata.party)}</p>` : ''}
+            ${leader.metadata?.district ? `<p class="leader-compact-meta">📍 ${sanitizeHTML(leader.metadata.district)}</p>` : ''}
           </div>
         </div>
       `).join('');

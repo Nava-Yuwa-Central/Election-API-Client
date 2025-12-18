@@ -28,6 +28,22 @@ class APIClient {
             }
 
             const data = await response.json();
+
+            // Normalize data: ensure `metadata` exists if `meta_data` is present
+            // This handles the Pydantic alias issue where API returns `meta_data`
+            if (Array.isArray(data)) {
+                return data.map(item => {
+                    if (item.meta_data && !item.metadata) {
+                        item.metadata = item.meta_data;
+                    }
+                    return item;
+                });
+            } else if (data && typeof data === 'object') {
+                if (data.meta_data && !data.metadata) {
+                    data.metadata = data.meta_data;
+                }
+            }
+
             return data;
         } catch (error) {
             console.error(`API Error (${endpoint}):`, error);
@@ -239,6 +255,7 @@ class APIClient {
 
 // Create global API client instance
 const api = new APIClient(APP_CONFIG.API_BASE_URL);
+window.api = api;
 
 // Export for module usage
 if (typeof module !== 'undefined' && module.exports) {

@@ -42,7 +42,7 @@ class Entity(Base):
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String(255), nullable=False, index=True)
     name_nepali = Column(String(255), nullable=True, index=True)
-    entity_type = Column(Enum(EntityType), nullable=False, index=True)
+    entity_type = Column(String(50), nullable=False, index=True)
     description = Column(Text, nullable=True)
     # Use 'meta_data' as Python attribute name, but map to 'metadata' column in DB
     meta_data = Column("metadata", JSON, nullable=True, default={})

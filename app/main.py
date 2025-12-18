@@ -118,6 +118,12 @@ app.include_router(api_router, prefix="/api/v1", tags=["v1"])
 frontend_path = Path(__file__).parent.parent / "frontend"
 if frontend_path.exists():
     app.mount("/frontend", StaticFiles(directory=str(frontend_path)), name="frontend")
+    
+    # Also mount assets at /assets for relative links to work
+    assets_path = frontend_path / "assets"
+    if assets_path.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_path)), name="assets")
+        
     logger.info(f"Mounted frontend static files from {frontend_path}")
 else:
     logger.warning(f"Frontend directory not found at {frontend_path}")
@@ -151,6 +157,42 @@ async def root():
             "health": "/health",
             "environment": settings.ENVIRONMENT,
         })
+
+
+@app.get("/index.html", response_class=FileResponse)
+async def index_page():
+    """Serve index.html."""
+    return FileResponse(Path(__file__).parent.parent / "frontend" / "index.html")
+
+
+@app.get("/leaders.html", response_class=FileResponse)
+async def leaders_page():
+    """Serve leaders.html."""
+    return FileResponse(Path(__file__).parent.parent / "frontend" / "leaders.html")
+
+
+@app.get("/map.html", response_class=FileResponse)
+async def map_page():
+    """Serve map.html."""
+    return FileResponse(Path(__file__).parent.parent / "frontend" / "map.html")
+
+
+@app.get("/parties.html", response_class=FileResponse)
+async def parties_page():
+    """Serve parties.html."""
+    path = Path(__file__).parent.parent / "frontend" / "parties.html"
+    if path.exists():
+        return FileResponse(path)
+    return HTMLResponse("<h1>Parties page under construction</h1>")
+
+
+@app.get("/leader-detail.html", response_class=FileResponse)
+async def leader_detail_page():
+    """Serve leader-detail.html."""
+    path = Path(__file__).parent.parent / "frontend" / "leader-detail.html"
+    if path.exists():
+        return FileResponse(path)
+    return HTMLResponse("<h1>Leader Detail page under construction</h1>")
 
 
 @app.get(
