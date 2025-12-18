@@ -1,16 +1,15 @@
-
 services:
   postgres:
     image: postgres:16-alpine
     container_name: nes-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-nesuser}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-CHANGE_ME_STRONG_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nespassword}
       POSTGRES_DB: ${POSTGRES_DB:-nepal_entity_db}
     # WARNING: Do not expose PostgreSQL port in production!
     # Uncomment only for local development/debugging
     ports:
-       - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -40,6 +39,7 @@ services:
     volumes:
       - ./app:/app/app
       - ./migrations:/app/migrations
+      - ./frontend:/app/frontend
     networks:
       - nes-network
     command: uvicorn app.main:app --host 0.0.0.0 --port 8195 --reload

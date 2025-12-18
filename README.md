@@ -45,7 +45,7 @@ cp .env.example .env
 
 3. Start the services:
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 4. Access the API:
@@ -145,22 +145,22 @@ CACHE_EXPIRY=3600
 
 ```bash
 # Start services
-docker-compose up -d
+docker compose up -d
 
 # Stop services
-docker-compose down
+docker compose down
 
 # View logs
-docker-compose logs -f
+docker compose logs -f
 
 # Rebuild containers
-docker-compose up -d --build
+docker compose up -d --build
 
 # Run database migrations
-docker-compose exec api alembic upgrade head
+docker compose exec api alembic upgrade head
 
 # Access database
-docker-compose exec postgres psql -U nesuser -d nepal_entity_db
+docker compose exec postgres psql -U nesuser -d nepal_entity_db
 ```
 
 ## Database Migrations

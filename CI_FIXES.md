@@ -173,7 +173,7 @@ isort app/ tests/
 
 ### Optional: Run Tests Locally
 ```bash
-docker-compose up -d postgres
+docker compose up -d postgres
 pytest tests/ -v
 ```
 

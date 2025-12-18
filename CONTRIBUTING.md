@@ -108,7 +108,7 @@ Feature requests are welcome! Please provide:
 
 5. **Start PostgreSQL with Docker**
    ```bash
-   docker-compose up -d postgres
+   docker compose up -d postgres
    ```
 
 6. **Run migrations**
@@ -129,16 +129,16 @@ Feature requests are welcome! Please provide:
 
 ```bash
 # Start all services
-docker-compose up -d
+docker compose up -d
 
 # View logs
-docker-compose logs -f api
+docker compose logs -f api
 
 # Run migrations
-docker-compose exec api alembic upgrade head
+docker compose exec api alembic upgrade head
 
 # Access API shell
-docker-compose exec api bash
+docker compose exec api bash
 ```
 
 ## 🎨 Coding Standards
