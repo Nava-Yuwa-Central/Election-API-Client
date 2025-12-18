@@ -37,7 +37,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install --with dev
+          poetry install --with dev --no-root
 
       - name: Check formatting with Black
         run: poetry run black --check app/ tests/
@@ -99,7 +99,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install
+          poetry install --no-root
 
       - name: Set up test database
         env:
@@ -180,7 +180,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install --only main
+          poetry install --only main --no-root
 
       - name: Check for security vulnerabilities
         run: poetry run safety check --file requirements.txt --output text
