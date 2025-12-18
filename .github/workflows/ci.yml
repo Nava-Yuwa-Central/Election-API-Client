@@ -28,9 +28,12 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cache/pypoetry
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/pyproject.toml') }}
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
             ${{ runner.os }}-poetry-
+
+      - name: Configure Poetry
+        run: poetry config virtualenvs.create false
 
       - name: Install dependencies
         run: |
@@ -47,9 +50,9 @@ jobs:
       - name: Lint with flake8
         run: |
           # Stop the build if there are Python syntax errors or undefined names
-          flake8 app/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          poetry run flake8 app/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
           # Exit-zero treats all errors as warnings
-          flake8 app/ tests/ --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
+          poetry run flake8 app/ tests/ --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
 
   test:
     name: Run Tests
@@ -87,9 +90,12 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cache/pypoetry
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/pyproject.toml') }}
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
             ${{ runner.os }}-poetry-
+
+      - name: Configure Poetry
+        run: poetry config virtualenvs.create false
 
       - name: Install dependencies
         run: |
@@ -168,6 +174,9 @@ jobs:
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Configure Poetry
+        run: poetry config virtualenvs.create false
 
       - name: Install dependencies
         run: |

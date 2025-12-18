@@ -14,12 +14,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better Docker layer caching
-COPY requirements.txt .
+# Install Poetry
+RUN pip install --no-cache-dir poetry
 
-# Install Python dependencies
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# Copy dependency files
+COPY pyproject.toml poetry.lock* ./
+
+# Install dependencies (no dev dependencies, no virtualenv inside container)
+RUN poetry config virtualenvs.create false && \
+    poetry install --only main --no-interaction --no-ansi
 
 # Copy application code last (changes most frequently)
 COPY . .
