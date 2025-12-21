@@ -339,26 +339,21 @@
         let leadersData = [];
         let mapData = null;
 
-        // Province Colors (NPBMIS-style clean palette)
-        const provinceColors = {
-            'Koshi': '#4A90E2',          // Blue
-            '1': '#4A90E2',              // Province 1
-            'Madhesh': '#7ED321',        // Green  
-            '2': '#7ED321',              // Province 2
-            'Bagmati': '#F5A623',        // Orange
-            '3': '#F5A623',              // Province 3
-            'Gandaki': '#50E3C2',        // Turquoise
-            '4': '#50E3C2',              // Province 4
-            'Lumbini': '#BD10E0',        // Purple
-            '5': '#BD10E0',              // Province 5
-            'Karnali': '#D0021B',        // Red
-            '6': '#D0021B',              // Province 6
-            'Sudur Pashchim': '#F8E71C', // Yellow
-            'Sudurpashchim': '#F8E71C',  // Alt spelling
-            '7': '#F8E71C'               // Province 7
+        // Color and Name Mappings
+        const provinceNames = {
+            '1': 'Koshi', '2': 'Madhesh', '3': 'Bagmati', '4': 'Gandaki', '5': 'Lumbini', '6': 'Karnali', '7': 'Sudur Pashchim'
         };
 
-        // District Mapping Fallback
+        const provinceColors = {
+            'Koshi': '#4A90E2', '1': '#4A90E2',
+            'Madhesh': '#7ED321', '2': '#7ED321',
+            'Bagmati': '#F5A623', '3': '#F5A623',
+            'Gandaki': '#50E3C2', '4': '#50E3C2',
+            'Lumbini': '#BD10E0', '5': '#BD10E0',
+            'Karnali': '#D0021B', '6': '#D0021B',
+            'Sudur Pashchim': '#F8E71C', 'Sudurpashchim': '#F8E71C', '7': '#F8E71C'
+        };
+
         const districtToProvince = {
             'Taplejung': 'Koshi', 'Panchthar': 'Koshi', 'Ilam': 'Koshi', 'Jhapa': 'Koshi', 'Morang': 'Koshi', 'Sunsari': 'Koshi', 'Dhankuta': 'Koshi', 'Terhathum': 'Koshi', 'Sankhuwasabha': 'Koshi', 'Bhojpur': 'Koshi', 'Solukhumbu': 'Koshi', 'Okhaldhunga': 'Koshi', 'Khotang': 'Koshi', 'Udayapur': 'Koshi',
             'Saptari': 'Madhesh', 'Siraha': 'Madhesh', 'Dhanusha': 'Madhesh', 'Mahottari': 'Madhesh', 'Sarlahi': 'Madhesh', 'Rautahat': 'Madhesh', 'Bara': 'Madhesh', 'Parsa': 'Madhesh',
@@ -420,17 +415,16 @@
         }
 
         function styleFeature(feature) {
-            // Get province from properties to determine color
-            const province = feature.properties.Province || String(feature.properties.STATE_CODE);
-            const color = provinceColors[province] || provinceColors[getProvinceName(feature.properties)] || '#ccc';
+            const props = feature.properties;
+            const provinceId = props.Province || props.STATE_CODE;
+            const provinceName = getProvinceName(props);
 
             return {
-                fillColor: color,
-                weight: 0.8,           // Thinner borders for districts (sub-provinces)
+                fillColor: provinceColors[provinceId] || provinceColors[provinceName] || '#ccc',
+                weight: 0.8,
                 opacity: 1,
-                color: '#ffffff',      // White borders
-                dashArray: '',
-                fillOpacity: 0.7       // Slightly higher opacity for solid Nepal look
+                color: '#ffffff',
+                fillOpacity: 0.7
             };
         }
 
@@ -481,22 +475,13 @@
             return null;
         }
 
-        function getProvinceName(properties) {
-            // Map province numbers to names
-            const provinceNames = {
-                '1': 'Koshi',
-                '2': 'Madhesh',
-                '3': 'Bagmati',
-                '4': 'Gandaki',
-                '5': 'Lumbini',
-                '6': 'Karnali',
-                '7': 'Sudur Pashchim'
-            };
+        function getProvinceName(props) {
+            return props.name || provinceNames[props.Province] || provinceNames[props.STATE_CODE] ||
+                `Province ${props.Province || props.STATE_CODE}`;
+        }
 
-            return properties.name ||
-                provinceNames[properties.Province] ||
-                provinceNames[String(properties.STATE_CODE)] ||
-                `Province ${properties.Province || properties.STATE_CODE}`;
+        function getDistrictName(props) {
+            return props.DISTRICT || props.DISTRICT_NAME || 'Unknown';
         }
 
         function selectProvince(props, layer) {
