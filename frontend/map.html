@@ -15,8 +15,8 @@
     <!-- Leaflet CSS (Local Refresh) -->
     <link rel="stylesheet" href="/frontend/lib/leaflet/leaflet.css" />
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/frontend/styles/main.css">
+    <!-- Custom CSS with cache busting -->
+    <link rel="stylesheet" href="/frontend/styles/main.css?v=1.1">
 
     <style>
         :root {
@@ -51,6 +51,8 @@
             width: 100%;
             height: 100%;
             z-index: 1;
+            background-color: #eff6ff;
+            /* Light blue background like RateMyNeta */
         }
 
         /* Dashboard Sidebar */
@@ -200,7 +202,45 @@
         }
 
         .leaflet-interactive {
-            transition: fill-opacity 0.2s, stroke-width 0.2s;
+            transition: fill-opacity 0.3s ease, stroke-width 0.2s ease;
+            cursor: pointer;
+        }
+
+        /* Enhanced Tooltip Styling */
+        .leaflet-tooltip {
+            background-color: rgba(44, 62, 80, 0.95);
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            color: white;
+            font-weight: 500;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .leaflet-tooltip:before {
+            border-top-color: rgba(44, 62, 80, 0.95);
+        }
+
+        /* Map Controls */
+        .leaflet-control-zoom {
+            border: none;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .leaflet-control-zoom a {
+            border: none;
+            width: 36px;
+            height: 36px;
+            line-height: 36px;
+            font-size: 18px;
+            transition: background-color 0.2s;
+        }
+
+        .leaflet-control-zoom a:hover {
+            background-color: #f0f0f0;
         }
     </style>
 </head>
@@ -299,15 +339,23 @@
         let leadersData = [];
         let mapData = null;
 
-        // Province Colors (Distinct Palette similar to ref)
+        // Province Colors (NPBMIS-style clean palette)
         const provinceColors = {
-            'Koshi': '#FF9F1C',       // Orange
-            'Madhesh': '#2EC4B6',     // Teal
-            'Bagmati': '#E71D36',     // Red
-            'Gandaki': '#FFBF69',     // Light Orange
-            'Lumbini': '#7209B7',     // Purple
-            'Karnali': '#3A86FF',     // Blue
-            'Sudurpashchim': '#8338EC' // Violet
+            'Koshi': '#4A90E2',          // Blue
+            '1': '#4A90E2',              // Province 1
+            'Madhesh': '#7ED321',        // Green  
+            '2': '#7ED321',              // Province 2
+            'Bagmati': '#F5A623',        // Orange
+            '3': '#F5A623',              // Province 3
+            'Gandaki': '#50E3C2',        // Turquoise
+            '4': '#50E3C2',              // Province 4
+            'Lumbini': '#BD10E0',        // Purple
+            '5': '#BD10E0',              // Province 5
+            'Karnali': '#D0021B',        // Red
+            '6': '#D0021B',              // Province 6
+            'Sudur Pashchim': '#F8E71C', // Yellow
+            'Sudurpashchim': '#F8E71C',  // Alt spelling
+            '7': '#F8E71C'               // Province 7
         };
 
         // District Mapping Fallback
@@ -332,26 +380,28 @@
                 center: [28.3949, 84.1240],
                 zoom: 7,
                 zoomControl: true,
-                attributionControl: false
+                attributionControl: false,
+                maxBounds: [[26, 80], [30.5, 88.5]], // Lock view to Nepal region
+                minZoom: 6
             });
 
-            // CartoDB Positron (Light, Clean) - Matches NPBMIS/WhoIsMyNeta style
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                maxZoom: 19
-            }).addTo(map);
-
-            L.control.attribution({ prefix: false }).addAttribution('&copy; <a href="http://www.openstreetmap.org/copyright">OSM</a>').addTo(map);
+            L.control.attribution({ prefix: false }).addAttribution('&copy; Election API Client / GeoJSON Data').addTo(map);
         }
 
         async function loadData() {
             try {
                 const [geoRes, leadersRes] = await Promise.all([
-                    fetch('/frontend/data/nepal-provinces.geojson'),
+                    fetch('/frontend/data/NewNepalDistrict.json'), // Load districts for "sub-provinces"
                     api.fetchLeaders({ limit: 1000 })
                 ]);
 
                 mapData = await geoRes.json();
                 leadersData = leadersRes;
+
+                // Group features by province for cleaner rendering
+                if (mapData && mapData.features) {
+                    console.log(`Loaded ${mapData.features.length} districts`);
+                }
 
                 addGeoJsonLayer();
 
@@ -370,13 +420,17 @@
         }
 
         function styleFeature(feature) {
+            // Get province from properties to determine color
+            const province = feature.properties.Province || String(feature.properties.STATE_CODE);
+            const color = provinceColors[province] || provinceColors[getProvinceName(feature.properties)] || '#ccc';
+
             return {
-                fillColor: provinceColors[feature.properties.name] || '#ccc',
-                weight: 2,
+                fillColor: color,
+                weight: 0.8,           // Thinner borders for districts (sub-provinces)
                 opacity: 1,
-                color: 'white', // White borders
-                dashArray: '3',
-                fillOpacity: 0.6
+                color: '#ffffff',      // White borders
+                dashArray: '',
+                fillOpacity: 0.7       // Slightly higher opacity for solid Nepal look
             };
         }
 
@@ -384,9 +438,9 @@
             var layer = e.target;
             layer.setStyle({
                 weight: 3,
-                color: '#666',
+                color: '#2c3e50',      // Darker border on hover
                 dashArray: '',
-                fillOpacity: 0.8
+                fillOpacity: 0.7       // Slightly more opaque on hover
             });
             if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
                 layer.bringToFront();
@@ -404,10 +458,14 @@
                 click: (e) => selectProvince(feature.properties, e.target)
             });
 
-            // Tooltip
-            layer.bindTooltip(`<strong>${feature.properties.name}</strong><br>${feature.properties.name_nepali}`, {
+            // Tooltip - show district and province
+            const districtName = feature.properties.DISTRICT || feature.properties.DISTRICT_NAME || 'Unknown';
+            const provinceName = getProvinceName(feature.properties);
+            layer.bindTooltip(`<strong>${districtName}</strong><br><small>${provinceName} Province</small>`, {
                 className: 'map-tooltip',
-                direction: 'top'
+                direction: 'top',
+                permanent: false,
+                sticky: true
             });
         }
 
@@ -423,27 +481,71 @@
             return null;
         }
 
+        function getProvinceName(properties) {
+            // Map province numbers to names
+            const provinceNames = {
+                '1': 'Koshi',
+                '2': 'Madhesh',
+                '3': 'Bagmati',
+                '4': 'Gandaki',
+                '5': 'Lumbini',
+                '6': 'Karnali',
+                '7': 'Sudur Pashchim'
+            };
+
+            return properties.name ||
+                provinceNames[properties.Province] ||
+                provinceNames[String(properties.STATE_CODE)] ||
+                `Province ${properties.Province || properties.STATE_CODE}`;
+        }
+
         function selectProvince(props, layer) {
             // UI Updates
             document.getElementById('selectPrompt').style.display = 'none';
             document.getElementById('detailView').style.display = 'block';
             document.getElementById('resetBtn').style.display = 'inline-block';
 
-            document.getElementById('provinceTitle').textContent = props.name;
-            document.getElementById('provinceCapital').textContent = `Capital: ${props.capital || 'N/A'}`;
+            // Get province and district names
+            const provinceName = getProvinceName(props);
+            const districtName = props.DISTRICT || props.DISTRICT_NAME;
+
+            document.getElementById('provinceTitle').textContent = districtName ? `${districtName}, ${provinceName}` : provinceName;
+
+            // Capital info - not in new data structure, so we'll add manually
+            const capitals = {
+                'Koshi': 'Biratnagar',
+                'Madhesh': 'Janakpur',
+                'Bagmati': 'Hetauda',
+                'Gandaki': 'Pokhara',
+                'Lumbini': 'Deukhuri',
+                'Karnali': 'Birendranagar',
+                'Sudur Pashchim': 'Godawari'
+            };
+            document.getElementById('provinceCapital').textContent = `Capital: ${capitals[provinceName] || 'N/A'}`;
 
             // Zoom to feature
             map.fitBounds(layer.getBounds());
 
             // Filter Data
-            const pLeaders = leadersData.filter(l => {
-                const prov = getProvinceForLeader(l);
-                return prov && prov.toLowerCase() === props.name.toLowerCase();
+            let pLeaders = leadersData.filter(l => {
+                const lDist = l.district?.name_en || l.district?.name;
+                return lDist && lDist.toLowerCase() === districtName.toLowerCase();
             });
+
+            // Fallback to province if no district leaders found 
+            const isProvinceWide = pLeaders.length === 0;
+            if (isProvinceWide) {
+                pLeaders = leadersData.filter(l => {
+                    const prov = getProvinceForLeader(l);
+                    return prov && prov.toLowerCase() === provinceName.toLowerCase();
+                });
+            }
 
             // Update Stats
             document.getElementById('countLeaders').textContent = pLeaders.length;
-            const uniqueDistricts = new Set(pLeaders.map(l => l.district?.name_en).filter(Boolean)).size;
+            const uniqueDistricts = isProvinceWide
+                ? new Set(pLeaders.map(l => l.district?.name_en || l.district?.name).filter(Boolean)).size
+                : 1;
             document.getElementById('countDistricts').textContent = uniqueDistricts;
 
             // Render Leaders

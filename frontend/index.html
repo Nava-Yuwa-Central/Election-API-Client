@@ -45,6 +45,7 @@
         <li><a href="map.html" class="nav-link">Map</a></li>
         <li><a href="leaders.html" class="nav-link">Leaders</a></li>
         <li><a href="parties.html" class="nav-link">Parties</a></li>
+        <li><a href="corruption.html" class="nav-link">Corruption</a></li>
       </ul>
     </div>
   </nav>
@@ -204,7 +205,7 @@
 
       // Load featured leaders
       try {
-        const leaders = await api.fetchLeaders({ limit: 24 });
+        const leaders = await api.fetchLeaders({ limit: 10 });
         renderFeaturedLeaders(leaders);
       } catch (error) {
         console.error('Error loading featured leaders:', error);
@@ -263,7 +264,7 @@
       }
 
       grid.innerHTML = leaders.map(leader => `
-        <div class="leader-compact-card scroll-reveal" onclick="window.location.href='leader-detail.html?id=${leader.id}'">
+        <div class="leader-compact-card" onclick="window.location.href='leader-detail.html?id=${leader.id}'">
           <img 
             src="${getImageUrl(leader)}" 
             alt="${sanitizeHTML(leader.name)}"
@@ -272,8 +273,6 @@
           >
           <div class="leader-compact-info">
             <h3 class="leader-compact-name">${sanitizeHTML(leader.name)}</h3>
-             ${leader.metadata?.party ? `<p class="leader-compact-meta" style="color: ${getPartyColor(leader.metadata.party)}">${sanitizeHTML(leader.metadata.party)}</p>` : ''}
-            ${leader.metadata?.district ? `<p class="leader-compact-meta">📍 ${sanitizeHTML(leader.metadata.district)}</p>` : ''}
           </div>
         </div>
       `).join('');
