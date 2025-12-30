@@ -181,7 +181,7 @@ class APIClient {
      */
     async fetchLeadersByProvince(province) {
         // Note: Production API might support deeper filtering, but we'll fetch and filter for now
-        const allLeaders = await this.fetchLeaders({ limit: 100 });
+        const allLeaders = await this.fetchLeaders({ limit: 1000 });
         return allLeaders.filter(leader =>
             leader.metadata?.province?.toLowerCase() === province.toLowerCase()
         );
@@ -191,7 +191,7 @@ class APIClient {
      * Fetch leaders by party
      */
     async fetchLeadersByParty(party) {
-        const allLeaders = await this.fetchLeaders({ limit: 100 });
+        const allLeaders = await this.fetchLeaders({ limit: 1000 });
         return allLeaders.filter(leader =>
             leader.metadata?.party?.toLowerCase().includes(party.toLowerCase())
         );
@@ -204,7 +204,7 @@ class APIClient {
         const queryParams = new URLSearchParams({
             entity_type: 'organization',
             sub_type: 'political_party',
-            limit: 100
+            limit: 1000  // Fetch all parties - API has 124 total
         });
 
         const parties = await this.fetch(`/entities?${queryParams.toString()}`);
@@ -227,7 +227,7 @@ class APIClient {
             return cached.data;
         }
 
-        const leaders = await this.fetchLeaders({ limit: 1000 });
+        const leaders = await this.fetchLeaders({ limit: 1000 });  // Max limit per request
         const parties = await this.fetchParties();
 
         const provinces = new Set();
