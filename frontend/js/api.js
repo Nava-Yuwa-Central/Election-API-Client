@@ -64,18 +64,43 @@ class APIClient {
             metadata: entity.metadata || entity.meta_data || {}
         };
 
+        // Extract education/qualification
+        if (!normalized.education) {
+            const qual = entity.attributes?.election_council_misc?.qualification?.en?.value
+                || entity.qualification?.en?.value;
+            if (qual) {
+                normalized.education = qual;
+                normalized.metadata.education = qual;
+            } else if (entity.personal_details?.education?.[0]?.degree?.en?.value) {
+                normalized.education = entity.personal_details.education[0].degree.en.value;
+                normalized.metadata.education = normalized.education;
+            }
+        }
+
         // Extract party from electoral details if missing
         if (!normalized.metadata.party && entity.electoral_details?.candidacies) {
             const latestCandidacy = entity.electoral_details.candidacies[0];
             if (latestCandidacy && latestCandidacy.party_id) {
-                // Strip prefix if present
-                normalized.metadata.party = latestCandidacy.party_id.split('/').pop().replace(/-/g, ' ');
+                // Strip prefix and format (e.g., entity:organization/political_party/nepali-congress -> Nepali Congress)
+                const rawParty = latestCandidacy.party_id.split('/').pop().replace(/-/g, ' ');
+                normalized.metadata.party = rawParty.charAt(0).toUpperCase() + rawParty.slice(1);
             }
         }
 
         // Extract image
         if (!normalized.metadata.image && entity.pictures && entity.pictures.length > 0) {
             normalized.metadata.image = entity.pictures[0].url;
+        }
+
+        // Handle potential criminal_cases/assets if they exist in attributes
+        if (entity.attributes?.election_council_misc) {
+            const misc = entity.attributes.election_council_misc;
+            if (misc.criminal_cases && normalized.metadata.criminal_cases === undefined) {
+                normalized.metadata.criminal_cases = misc.criminal_cases;
+            }
+            if (misc.assets && normalized.metadata.assets === undefined) {
+                normalized.metadata.assets = misc.assets;
+            }
         }
 
         // Handle meta_data alias
