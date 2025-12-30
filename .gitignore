@@ -33,6 +33,7 @@ venv/
 ENV/
 env/
 .venv
+venv_stable/
 
 # IDEs
 .vscode/
@@ -62,6 +63,8 @@ postgres_data/
 
 # Logs
 *.log
+server_log.txt
+server_error.txt
 
 # Node modules (if any)
 node_modules/
