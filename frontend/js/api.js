@@ -29,19 +29,16 @@ class APIClient {
 
             const data = await response.json();
 
-            // Normalize data: ensure `metadata` exists if `meta_data` is present
-            // This handles the Pydantic alias issue where API returns `meta_data`
+            // Handle production API wrapped response { entities: [], total: ... }
+            if (data && data.entities && Array.isArray(data.entities)) {
+                return data.entities.map(item => this.normalizeEntity(item));
+            }
+
+            // Normalization for single objects or arrays
             if (Array.isArray(data)) {
-                return data.map(item => {
-                    if (item.meta_data && !item.metadata) {
-                        item.metadata = item.meta_data;
-                    }
-                    return item;
-                });
+                return data.map(item => this.normalizeEntity(item));
             } else if (data && typeof data === 'object') {
-                if (data.meta_data && !data.metadata) {
-                    data.metadata = data.meta_data;
-                }
+                return this.normalizeEntity(data);
             }
 
             return data;
@@ -49,6 +46,44 @@ class APIClient {
             console.error(`API Error (${endpoint}):`, error);
             throw error;
         }
+    }
+
+    /**
+     * Normalize production API entity to frontend schema
+     */
+    normalizeEntity(entity) {
+        if (!entity || typeof entity !== 'object') return entity;
+
+        // Extract primary name
+        const primaryName = entity.names && entity.names[0];
+        const normalized = {
+            ...entity,
+            name: primaryName?.en?.full || entity.name,
+            name_nepali: primaryName?.ne?.full || entity.name_nepali,
+            // Extract metadata from nesting if not already present
+            metadata: entity.metadata || entity.meta_data || {}
+        };
+
+        // Extract party from electoral details if missing
+        if (!normalized.metadata.party && entity.electoral_details?.candidacies) {
+            const latestCandidacy = entity.electoral_details.candidacies[0];
+            if (latestCandidacy && latestCandidacy.party_id) {
+                // Strip prefix if present
+                normalized.metadata.party = latestCandidacy.party_id.split('/').pop().replace(/-/g, ' ');
+            }
+        }
+
+        // Extract image
+        if (!normalized.metadata.image && entity.pictures && entity.pictures.length > 0) {
+            normalized.metadata.image = entity.pictures[0].url;
+        }
+
+        // Handle meta_data alias
+        if (entity.meta_data && !entity.metadata) {
+            normalized.metadata = entity.meta_data;
+        }
+
+        return normalized;
     }
 
     /**
@@ -85,11 +120,11 @@ class APIClient {
         const queryParams = new URLSearchParams({
             entity_type: 'person',
             limit: params.limit || APP_CONFIG.ITEMS_PER_PAGE,
-            skip: params.skip || 0,
-            ...(params.search && { search: params.search }),
+            offset: params.skip || 0, // Prod API uses offset
+            ...(params.search && { query: params.search }), // Prod API uses query
         });
 
-        return this.getCached(`/entities/?${queryParams.toString()}`);
+        return this.getCached(`/entities?${queryParams.toString()}`);
     }
 
     /**
@@ -109,19 +144,19 @@ class APIClient {
 
         const queryParams = new URLSearchParams({
             entity_type: 'person',
-            search: query,
+            query: query, // Prod API uses query
             limit: 10,
         });
 
-        return this.fetch(`/entities/?${queryParams.toString()}`);
+        return this.fetch(`/entities?${queryParams.toString()}`);
     }
 
     /**
      * Fetch leaders by province (from metadata)
      */
     async fetchLeadersByProvince(province) {
-        // Note: This is a simplified version. You may need server-side filtering
-        const allLeaders = await this.fetchLeaders({ limit: 1000 });
+        // Note: Production API might support deeper filtering, but we'll fetch and filter for now
+        const allLeaders = await this.fetchLeaders({ limit: 100 });
         return allLeaders.filter(leader =>
             leader.metadata?.province?.toLowerCase() === province.toLowerCase()
         );
@@ -131,7 +166,7 @@ class APIClient {
      * Fetch leaders by party
      */
     async fetchLeadersByParty(party) {
-        const allLeaders = await this.fetchLeaders({ limit: 1000 });
+        const allLeaders = await this.fetchLeaders({ limit: 100 });
         return allLeaders.filter(leader =>
             leader.metadata?.party?.toLowerCase().includes(party.toLowerCase())
         );
@@ -141,18 +176,18 @@ class APIClient {
      * Get unique parties from leaders
      */
     async fetchParties() {
-        const leaders = await this.fetchLeaders({ limit: 1000 });
-        const parties = new Set();
-
-        leaders.forEach(leader => {
-            if (leader.metadata?.party) {
-                parties.add(leader.metadata.party);
-            }
+        const queryParams = new URLSearchParams({
+            entity_type: 'organization',
+            sub_type: 'political_party',
+            limit: 100
         });
 
-        return Array.from(parties).map(party => ({
-            name: party,
-            count: leaders.filter(l => l.metadata?.party === party).length,
+        const parties = await this.fetch(`/entities?${queryParams.toString()}`);
+
+        return parties.map(party => ({
+            name: party.name,
+            id: party.id,
+            count: 0 // We'd need another call or server support for true counts
         }));
     }
 
