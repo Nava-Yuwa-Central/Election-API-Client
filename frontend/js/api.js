@@ -15,6 +15,8 @@ class APIClient {
         const url = `${this.baseURL}${endpoint}`;
 
         try {
+            console.log(`API Request: ${url}`);
+            
             const response = await fetch(url, {
                 headers: {
                     'Content-Type': 'application/json',
@@ -28,16 +30,26 @@ class APIClient {
             }
 
             const data = await response.json();
+            console.log(`API Response:`, data);
 
-            // Handle production API wrapped response { entities: [], total: ... }
+            // Handle different response formats
+            // 1. Direct array response (from our local server)
+            if (Array.isArray(data)) {
+                return data.map(item => this.normalizeEntity(item));
+            }
+            
+            // 2. Wrapped response with entities array { entities: [], total: ... }
             if (data && data.entities && Array.isArray(data.entities)) {
                 return data.entities.map(item => this.normalizeEntity(item));
             }
+            
+            // 3. Wrapped response with data array { data: [], total: ... }
+            if (data && data.data && Array.isArray(data.data)) {
+                return data.data.map(item => this.normalizeEntity(item));
+            }
 
-            // Normalization for single objects or arrays
-            if (Array.isArray(data)) {
-                return data.map(item => this.normalizeEntity(item));
-            } else if (data && typeof data === 'object') {
+            // 4. Single object response
+            if (data && typeof data === 'object' && !Array.isArray(data)) {
                 return this.normalizeEntity(data);
             }
 
@@ -201,18 +213,45 @@ class APIClient {
      * Get unique parties from leaders
      */
     async fetchParties() {
+        // First try to get political_party entities
         const queryParams = new URLSearchParams({
-            entity_type: 'organization',
-            sub_type: 'political_party',
-            limit: 1000  // Fetch all parties - API has 124 total
+            entity_type: 'political_party',
+            limit: 1000
         });
 
-        const parties = await this.fetch(`/entities?${queryParams.toString()}`);
+        try {
+            const parties = await this.fetch(`/entities?${queryParams.toString()}`);
+            
+            if (parties && parties.length > 0) {
+                return parties.map(party => ({
+                    name: party.name,
+                    id: party.id,
+                    count: 0 // We'd need another call or server support for true counts
+                }));
+            }
+        } catch (error) {
+            console.log('No political_party entities found, extracting from leaders...');
+        }
 
-        return parties.map(party => ({
-            name: party.name,
-            id: party.id,
-            count: 0 // We'd need another call or server support for true counts
+        // Fallback: Extract unique parties from leaders' metadata
+        const leaders = await this.fetchLeaders({ limit: 1000 });
+        const partyMap = new Map();
+
+        leaders.forEach(leader => {
+            const party = leader.metadata?.party;
+            if (party) {
+                if (partyMap.has(party)) {
+                    partyMap.set(party, partyMap.get(party) + 1);
+                } else {
+                    partyMap.set(party, 1);
+                }
+            }
+        });
+
+        return Array.from(partyMap.entries()).map(([name, count]) => ({
+            name,
+            id: name.toLowerCase().replace(/\s+/g, '-'),
+            count
         }));
     }
 

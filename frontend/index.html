@@ -268,10 +268,13 @@
             src="${getImageUrl(leader)}" 
             alt="${sanitizeHTML(leader.name)}"
             class="leader-compact-img"
-            onerror="this.src='assets/placeholder.jpg'"
+            onerror="this.src='assets/placeholder.svg'"
           >
           <div class="leader-compact-info">
             <h3 class="leader-compact-name">${sanitizeHTML(leader.name)}</h3>
+            ${leader.name_nepali ? `<p class="leader-compact-party" style="font-size: 0.85em; color: var(--color-gray); margin: 4px 0;">${sanitizeHTML(leader.name_nepali)}</p>` : ''}
+            <p class="leader-compact-party">${sanitizeHTML(leader.metadata?.party || leader.metadata?.political_party || 'Independent')}</p>
+            <p class="leader-compact-district">${sanitizeHTML(leader.metadata?.district || '')}</p>
           </div>
         </div>
       `).join('');

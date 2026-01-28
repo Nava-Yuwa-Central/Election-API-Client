@@ -319,17 +319,32 @@
 
             // Header
             document.getElementById('headerName').textContent = leader.name;
-            document.getElementById('headerParty').textContent = meta.party || 'Independent';
-
-            if (meta.photo_url) {
-                document.getElementById('headerImage').src = getImageUrl(leader);
+            
+            // Add Nepali name if available
+            if (leader.name_nepali) {
+                document.getElementById('headerName').innerHTML = `
+                    ${leader.name}<br>
+                    <span style="font-size: 0.7em; opacity: 0.9; font-weight: 500;">${leader.name_nepali}</span>
+                `;
             }
+            
+            document.getElementById('headerParty').textContent = meta.party || meta.political_party || 'Independent';
+
+            // Set image with proper fallback
+            const headerImg = document.getElementById('headerImage');
+            const imageUrl = getImageUrl(leader);
+            console.log('Setting image URL:', imageUrl);
+            
+            headerImg.src = imageUrl;
+            headerImg.onerror = function() {
+                console.log('Image failed to load, using placeholder');
+                this.src = 'assets/placeholder.svg';
+            };
 
             // Info
-            document.getElementById('valDob').textContent = `${meta.dob || 'Unknown'} (${meta.age || 'N/A'} years)`;
-            document.getElementById('valGender').textContent = 'Male'; // Default or map if available
+            document.getElementById('valDob').textContent = `${meta.dob || 'Unknown'} ${meta.age ? `(${meta.age} years)` : ''}`;
+            document.getElementById('valGender').textContent = meta.gender || 'Male';
             document.getElementById('valEducation').textContent = meta.education || 'Unknown';
-            // document.getElementById('valOccupation').textContent = 'Politician'; // Static for now
 
             const address = [];
             if (meta.district) address.push(meta.district);
@@ -342,9 +357,8 @@
             document.getElementById('valCases').textContent = meta.criminal_cases || 0;
 
             // Bio
-            // Leader description often contains HTML from seed.
             const bioEl = document.getElementById('valBio');
-            if (leader.description) {
+            if (leader.description && leader.description.trim()) {
                 // Simple check to see if it's HTML-like
                 if (leader.description.includes('<') && leader.description.includes('>')) {
                     bioEl.innerHTML = leader.description;
@@ -355,9 +369,10 @@
                 bioEl.textContent = "No biography available.";
             }
 
-            // Election History Mockup (Dynamic parts)
-            document.getElementById('histConstituency').textContent = `${meta.district || 'Unknown'} (2079)`;
-            document.getElementById('histParty').textContent = meta.party || 'Independent';
+            // Election History
+            const constituency = meta.constituency || `${meta.district || 'Unknown'}-${meta.election_area_no || '1'}`;
+            document.getElementById('histConstituency').textContent = `${constituency} (2079)`;
+            document.getElementById('histParty').textContent = meta.party || meta.political_party || 'Independent';
         }
 
         function formatCurrency(value) {

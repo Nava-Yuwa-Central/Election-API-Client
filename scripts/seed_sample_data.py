@@ -199,7 +199,7 @@ async def seed_data():
                 
                 # Create new leader
                 entity_dict = leader_data.copy()
-                entity_dict['meta_data'] = entity_dict.pop('metadata')
+                entity_dict['metadata'] = entity_dict.pop('metadata')
                 
                 leader = Entity(**entity_dict)
                 db.add(leader)

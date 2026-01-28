@@ -91,12 +91,27 @@ function throttle(func, limit = 100) {
  * Get image URL or placeholder
  */
 function getImageUrl(leader, size = 'medium') {
-    if (leader?.metadata?.photo_url) {
-        return leader.metadata.photo_url;
+    // Check multiple possible image sources
+    const imageUrl = leader?.metadata?.image_url || 
+                    leader?.metadata?.image || 
+                    leader?.metadata?.photo_url ||
+                    leader?.image_url ||
+                    leader?.image;
+    
+    if (imageUrl) {
+        // If it's a relative path from parliament API, make it absolute
+        if (imageUrl.startsWith('/uploads/') || imageUrl.startsWith('uploads/')) {
+            return `https://hr.parliament.gov.np/${imageUrl}`;
+        }
+        // If it already contains parliament domain
+        if (imageUrl.includes('parliament.gov.np')) {
+            return imageUrl;
+        }
+        return imageUrl;
     }
 
     // Return placeholder
-    return `assets/placeholder.jpg`;
+    return `assets/placeholder.svg`;
 }
 
 /**
@@ -120,15 +135,19 @@ function getPartyColor(partyName) {
  * Get party badge class
  */
 function getPartyBadgeClass(partyName) {
-    if (!partyName) return '';
+    if (!partyName) return 'party-independent';
 
     const partyLower = partyName.toLowerCase();
 
-    if (partyLower.includes('congress')) return 'party-congress';
-    if (partyLower.includes('uml')) return 'party-uml';
-    if (partyLower.includes('maoist')) return 'party-maoist';
+    if (partyLower.includes('congress') || partyLower.includes('काङ्ग्रेस')) return 'party-congress';
+    if (partyLower.includes('uml') || partyLower.includes('एमाले')) return 'party-uml';
+    if (partyLower.includes('communist') || partyLower.includes('कम्युनिष्ट')) return 'party-communist';
+    if (partyLower.includes('maoist') || partyLower.includes('माओवादी')) return 'party-maoist';
+    if (partyLower.includes('samajwadi') || partyLower.includes('समाजवादी')) return 'party-samajwadi';
+    if (partyLower.includes('janata') || partyLower.includes('जनता')) return 'party-janata';
+    if (partyLower.includes('loktantrik') || partyLower.includes('लोकतान्त्रिक')) return 'party-loktantrik';
 
-    return '';
+    return 'party-other';
 }
 
 /**
