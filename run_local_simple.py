@@ -36,6 +36,18 @@ class NepalEntityHandler(http.server.SimpleHTTPRequestHandler):
             # Serve index.html for root
             self.path = '/index.html'
             super().do_GET()
+
+        elif path == '/favicon.ico' or path == '/favicon.svg':
+            # Serve favicon
+            try:
+                favicon_path = Path(self.directory) / "favicon.svg"
+                if favicon_path.exists():
+                    self.path = '/favicon.svg'
+                    super().do_GET()
+                else:
+                    self.send_error(404, "Favicon not found")
+            except:
+                self.send_error(404, "Favicon not found")
         else:
             # Serve static files
             super().do_GET()

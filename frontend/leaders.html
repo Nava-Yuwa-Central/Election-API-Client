@@ -49,6 +49,29 @@
             position: relative;
         }
 
+        /* Candidate Photo Styles */
+        .candidate-photo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .candidate-photo-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .candidate-photo-small:hover {
+            border-color: var(--color-primary);
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
         .leaders-table th.sortable:hover {
             background-color: var(--color-primary-dark);
         }
@@ -154,6 +177,7 @@
                 <li><a href="map.html" class="nav-link">Map</a></li>
                 <li><a href="leaders.html" class="nav-link active">Leaders</a></li>
                 <li><a href="parties.html" class="nav-link">Parties</a></li>
+                <li><a href="photo-gallery.html" class="nav-link">Photos</a></li>
             </ul>
         </div>
     </nav>
@@ -247,11 +271,10 @@
                 <table class="leaders-table">
                     <thead>
                         <tr>
-                            <th style="width: 50px;">S.No.</th>
+                            <th style="width: 60px;">Photo</th>
                             <th class="sortable" onclick="sortBy('name')">Candidate</th>
                             <th class="sortable" onclick="sortBy('party')">Party</th>
-                            <th class="sortable" onclick="sortBy('cases')" style="text-align: center;">Criminal
-                                API<br>Cases</th>
+                            <th class="sortable" onclick="sortBy('cases')" style="text-align: center;">Criminal<br>Cases</th>
                             <th class="sortable" onclick="sortBy('education')">Education</th>
                             <th class="sortable" onclick="sortBy('assets')" style="text-align: right;">Total Assets</th>
                             <th class="sortable" onclick="sortBy('liabilities')" style="text-align: right;">Liabilities
@@ -539,7 +562,16 @@
 
                 html += `
                     <tr>
-                        <td>${serialNumber}</td>
+                        <td style="text-align: center; padding: 8px;">
+                            <div class="candidate-photo-container">
+                                <img src="${getPhotoUrl(leader)}" 
+                                     alt="${sanitizeHTML(leader.name)}" 
+                                     class="candidate-photo-small"
+                                     onerror="this.src='assets/placeholder.svg'; this.onerror=null;"
+                                     onclick="window.open('leader-detail.html?id=${leader.id}', '_blank')"
+                                     title="Click to view ${sanitizeHTML(leader.name)}'s profile">
+                            </div>
+                        </td>
                         <td class="candidate-cell">
                             <a href="leader-detail.html?id=${leader.id}">${sanitizeHTML(leader.name)}</a>
                             ${leader.name_nepali ? `<span class="nepali-name">${sanitizeHTML(leader.name_nepali)}</span>` : ''}
@@ -593,6 +625,22 @@
             return 'Rs ' + num.toLocaleString('en-IN', {
                 maximumFractionDigits: 0
             });
+        }
+
+        // Helper to get photo URL with fallbacks
+        function getPhotoUrl(leader) {
+            // Try multiple sources for photo URL
+            if (leader.images && leader.images.images && leader.images.images.original) {
+                return leader.images.images.original;
+            }
+            if (leader.metadata && leader.metadata.photo_url) {
+                return leader.metadata.photo_url;
+            }
+            if (leader.metadata && leader.metadata.image_url) {
+                return leader.metadata.image_url;
+            }
+            // Fallback to placeholder
+            return 'assets/placeholder.svg';
         }
     </script>
 </body>
