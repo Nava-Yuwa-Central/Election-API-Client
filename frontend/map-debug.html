@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Map - Who's My Neta Nepal</title>
+    <title>[DEBUG] Interactive Map - Who's My Neta Nepal</title>
     <meta name="description" content="Interactive map of Nepal showing province-wise political data">
 
     <!-- Fonts -->
@@ -277,6 +277,33 @@
             border: 1px solid #ddd;
         }
     </style>
+
+        <script>
+            // Debug logging
+            const originalLog = console.log;
+            const originalError = console.error;
+            
+            console.log = function(...args) {
+                originalLog.apply(console, args);
+                // You could also display logs on the page here
+            };
+            
+            console.error = function(...args) {
+                originalError.apply(console, args);
+                // Display errors on the page
+                const errorDiv = document.getElementById('debug-errors') || createErrorDiv();
+                errorDiv.innerHTML += '<div style="color: red; margin: 5px 0;">' + args.join(' ') + '</div>';
+            };
+            
+            function createErrorDiv() {
+                const div = document.createElement('div');
+                div.id = 'debug-errors';
+                div.style.cssText = 'position: fixed; top: 10px; right: 10px; background: white; border: 1px solid red; padding: 10px; max-width: 300px; z-index: 10000; max-height: 200px; overflow-y: auto;';
+                document.body.appendChild(div);
+                return div;
+            }
+        </script>
+        
 </head>
 
 <body>
