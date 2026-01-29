@@ -627,7 +627,43 @@
             });
         }
 
-        // Helper to get photo URL with fallbacks
+                // Helper to get photo URL with better fallbacks
+        function getPhotoUrl(leader) {
+            // Try multiple sources for photo URL in order of preference
+            let photoUrl = null;
+            
+            // 1. Try images.images.original (main photo)
+            if (leader.images && leader.images.images && leader.images.images.original) {
+                photoUrl = leader.images.images.original;
+                // Make sure it's not a concatenated URL
+                if (!photoUrl.includes('https://randomuser.me') || photoUrl.indexOf('https://') === photoUrl.lastIndexOf('https://')) {
+                    return photoUrl;
+                }
+            }
+            
+            // 2. Try metadata photo_url
+            if (leader.metadata && leader.metadata.photo_url) {
+                return leader.metadata.photo_url;
+            }
+            
+            // 3. Try metadata image_url
+            if (leader.metadata && leader.metadata.image_url) {
+                return leader.metadata.image_url;
+            }
+            
+            // 4. Generate a consistent photo based on ID and gender
+            const candidateId = leader.id || 1000;
+            const gender = leader.gender || 0;
+            
+            if (gender === 1) {
+                // Female - use pravatar with offset
+                return `https://i.pravatar.cc/200?img=${(candidateId % 70) + 40}`;
+            } else {
+                // Male - use pravatar
+                return `https://i.pravatar.cc/200?img=${(candidateId % 70) + 1}`;
+            }
+        }
+
         function getPhotoUrl(leader) {
             // Try multiple sources for photo URL
             if (leader.images && leader.images.images && leader.images.images.original) {

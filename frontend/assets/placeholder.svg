@@ -1,6 +1,12 @@
-<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="200" height="200" fill="#F3F4F6"/>
-<circle cx="100" cy="80" r="30" fill="#9CA3AF"/>
-<path d="M50 150C50 125.147 70.147 105 95 105H105C129.853 105 150 125.147 150 150V160H50V150Z" fill="#9CA3AF"/>
-<text x="100" y="180" text-anchor="middle" fill="#6B7280" font-family="Arial" font-size="12">No Photo</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+    <defs>
+        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#357ABD;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+    <rect width="200" height="200" fill="url(#grad1)" rx="100"/>
+    <circle cx="100" cy="80" r="30" fill="white" opacity="0.8"/>
+    <path d="M 60 140 Q 100 120 140 140 L 140 180 Q 100 160 60 180 Z" fill="white" opacity="0.8"/>
+    <text x="100" y="190" text-anchor="middle" fill="white" font-size="12" font-family="Arial">Nepal</text>
 </svg>
