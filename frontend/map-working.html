@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nepal Interactive Map - Working Version</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .map-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        #map {
+            flex: 1;
+            height: 100vh;
+        }
+        
+        .sidebar {
+            width: 350px;
+            background: white;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+        
+        .leader-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .leader-item:hover {
+            background: #f5f5f5;
+        }
+        
+        .leader-photo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+        
+        .leader-info h4 {
+            margin: 0;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .leader-info p {
+            margin: 2px 0 0 0;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 10px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        .navbar a {
+            margin-right: 20px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .map-container {
+            margin-top: 60px;
+            height: calc(100vh - 60px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="index.html">🇳🇵 Who's My Neta Nepal</a>
+        <a href="index.html">Home</a>
+        <a href="map-working.html" style="color: #4A90E2;">Map</a>
+        <a href="leaders.html">Leaders</a>
+        <a href="parties.html">Parties</a>
+    </nav>
+
+    <div class="map-container">
+        <!-- Map -->
+        <div id="map"></div>
+        
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>Electoral Dashboard</h2>
+            <div id="sidebar-content">
+                <div class="loading">
+                    <div style="font-size: 2em; margin-bottom: 10px;">🗺️</div>
+                    <p>Loading map data...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        let map;
+        let leadersData = [];
+        let selectedProvince = null;
+        
+        // Province data with coordinates
+        const provinces = [
+            { name: 'Koshi', lat: 27.025, lng: 87.267, color: '#4A90E2' },
+            { name: 'Madhesh', lat: 26.728, lng: 85.373, color: '#7ED321' },
+            { name: 'Bagmati', lat: 27.717, lng: 85.324, color: '#F5A623' },
+            { name: 'Gandaki', lat: 28.230, lng: 83.988, color: '#50E3C2' },
+            { name: 'Lumbini', lat: 27.875, lng: 82.183, color: '#BD10E0' },
+            { name: 'Karnali', lat: 29.267, lng: 82.183, color: '#D0021B' },
+            { name: 'Sudurpashchim', lat: 29.267, lng: 80.583, color: '#F8E71C' }
+        ];
+        
+        // District to province mapping
+        const districtToProvince = {
+            'Taplejung': 'Koshi', 'Panchthar': 'Koshi', 'Ilam': 'Koshi', 'Jhapa': 'Koshi',
+            'Morang': 'Koshi', 'Sunsari': 'Koshi', 'Dhankuta': 'Koshi', 'Terhathum': 'Koshi',
+            'Sankhuwasabha': 'Koshi', 'Bhojpur': 'Koshi', 'Solukhumbu': 'Koshi', 
+            'Okhaldhunga': 'Koshi', 'Khotang': 'Koshi', 'Udayapur': 'Koshi',
+            
+            'Saptari': 'Madhesh', 'Siraha': 'Madhesh', 'Dhanusha': 'Madhesh', 'Dhanusa': 'Madhesh',
+            'Mahottari': 'Madhesh', 'Sarlahi': 'Madhesh', 'Rautahat': 'Madhesh',
+            'Bara': 'Madhesh', 'Parsa': 'Madhesh',
+            
+            'Dolakha': 'Bagmati', 'Ramechhap': 'Bagmati', 'Sindhuli': 'Bagmati',
+            'Kavrepalanchok': 'Bagmati', 'Sindhupalchok': 'Bagmati', 'Sindhupalchowk': 'Bagmati',
+            'Rasuwa': 'Bagmati', 'Nuwakot': 'Bagmati', 'Dhading': 'Bagmati',
+            'Chitwan': 'Bagmati', 'Makwanpur': 'Bagmati', 'Bhaktapur': 'Bagmati',
+            'Lalitpur': 'Bagmati', 'Kathmandu': 'Bagmati',
+            
+            'Gorkha': 'Gandaki', 'Lamjung': 'Gandaki', 'Tanahu': 'Gandaki',
+            'Syangja': 'Gandaki', 'Kaski': 'Gandaki', 'Manang': 'Gandaki',
+            'Mustang': 'Gandaki', 'Myagdi': 'Gandaki', 'Nawalpur': 'Gandaki',
+            'Parbat': 'Gandaki', 'Baglung': 'Gandaki',
+            
+            'Rukum East': 'Lumbini', 'Rolpa': 'Lumbini', 'Pyuthan': 'Lumbini',
+            'Gulmi': 'Lumbini', 'Arghakhanchi': 'Lumbini', 'Palpa': 'Lumbini',
+            'Parasi': 'Lumbini', 'Rupandehi': 'Lumbini', 'Kapilvastu': 'Lumbini',
+            'Kapilbastu': 'Lumbini', 'Dang': 'Lumbini', 'Banke': 'Lumbini', 'Bardiya': 'Lumbini',
+            
+            'Rukum West': 'Karnali', 'Salyan': 'Karnali', 'Dolpa': 'Karnali',
+            'Jumla': 'Karnali', 'Mugu': 'Karnali', 'Humla': 'Karnali',
+            'Kalikot': 'Karnali', 'Jajarkot': 'Karnali', 'Dailekh': 'Karnali', 'Surkhet': 'Karnali',
+            
+            'Bajura': 'Sudurpashchim', 'Bajhang': 'Sudurpashchim', 'Doti': 'Sudurpashchim',
+            'Achham': 'Sudurpashchim', 'Darchula': 'Sudurpashchim', 'Baitadi': 'Sudurpashchim',
+            'Dadeldhura': 'Sudurpashchim', 'Kanchanpur': 'Sudurpashchim', 'Kailali': 'Sudurpashchim'
+        };
+        
+        async function initMap() {
+            console.log('🗺️ Initializing Nepal map...');
+            
+            // Create map
+            map = L.map('map').setView([28.3949, 84.1240], 7);
+            
+            // Add base tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 10
+            }).addTo(map);
+            
+            // Set Nepal bounds
+            const nepalBounds = [[26.3, 80.0], [30.4, 88.2]];
+            map.fitBounds(nepalBounds, { padding: [20, 20] });
+            
+            console.log('✅ Base map loaded');
+            
+            // Load leaders data
+            await loadLeadersData();
+            
+            // Add province markers
+            addProvinceMarkers();
+            
+            // Try to load GeoJSON boundaries
+            await loadBoundaries();
+            
+            console.log('✅ Map initialization complete');
+        }
+        
+        async function loadLeadersData() {
+            try {
+                console.log('📊 Loading leaders data...');
+                leadersData = await api.fetchLeaders({ limit: 1000 });
+                console.log(`✅ Loaded ${leadersData.length} leaders`);
+                updateSidebar();
+            } catch (error) {
+                console.error('❌ Failed to load leaders:', error);
+                leadersData = [];
+                updateSidebar('Failed to load leaders data');
+            }
+        }
+        
+        function addProvinceMarkers() {
+            console.log('📍 Adding province markers...');
+            
+            provinces.forEach(province => {
+                // Count leaders in this province
+                const leaderCount = leadersData.filter(leader => {
+                    const district = leader.district?.name_en || leader.metadata?.district;
+                    return district && districtToProvince[district] === province.name;
+                }).length;
+                
+                // Create marker
+                const marker = L.circle([province.lat, province.lng], {
+                    color: province.color,
+                    fillColor: province.color,
+                    fillOpacity: 0.6,
+                    radius: Math.max(25000, leaderCount * 1500)
+                }).addTo(map);
+                
+                // Add popup
+                marker.bindPopup(`
+                    <div style="text-align: center;">
+                        <h3>${province.name} Province</h3>
+                        <p><strong>${leaderCount}</strong> Representatives</p>
+                        <button onclick="selectProvince('${province.name}')" style="padding: 5px 10px; background: ${province.color}; color: white; border: none; border-radius: 3px; cursor: pointer;">View Details</button>
+                    </div>
+                `);
+                
+                // Add click handler
+                marker.on('click', () => selectProvince(province.name));
+            });
+            
+            console.log('✅ Province markers added');
+        }
+        
+        async function loadBoundaries() {
+            try {
+                console.log('🗺️ Loading district boundaries...');
+                const response = await fetch('data/NewNepalDistrict.json');
+                
+                if (response.ok) {
+                    const geoData = await response.json();
+                    console.log(`✅ Loaded ${geoData.features.length} district boundaries`);
+                    
+                    // Add boundaries to map
+                    L.geoJSON(geoData, {
+                        style: {
+                            fillColor: '#4A90E2',
+                            weight: 1,
+                            opacity: 0.8,
+                            color: '#2c3e50',
+                            fillOpacity: 0.3
+                        },
+                        onEachFeature: function(feature, layer) {
+                            const districtName = feature.properties.DISTRICT || feature.properties.DISTRICT_NAME;
+                            const provinceName = districtToProvince[districtName] || 'Unknown';
+                            
+                            layer.bindPopup(`<strong>${districtName}</strong><br>${provinceName} Province`);
+                            layer.on('click', () => selectProvince(provinceName));
+                        }
+                    }).addTo(map);
+                    
+                } else {
+                    console.log('⚠️ District boundaries not available, using province markers only');
+                }
+            } catch (error) {
+                console.log('⚠️ Could not load boundaries:', error.message);
+            }
+        }
+        
+        function selectProvince(provinceName) {
+            console.log(`🎯 Selected province: ${provinceName}`);
+            selectedProvince = provinceName;
+            
+            // Filter leaders by province
+            const provinceLeaders = leadersData.filter(leader => {
+                const district = leader.district?.name_en || leader.metadata?.district;
+                return district && districtToProvince[district] === provinceName;
+            });
+            
+            updateSidebar(null, provinceName, provinceLeaders);
+        }
+        
+        function updateSidebar(error = null, provinceName = null, leaders = null) {
+            const content = document.getElementById('sidebar-content');
+            
+            if (error) {
+                content.innerHTML = `
+                    <div style="text-align: center; color: #d32f2f; padding: 20px;">
+                        <div style="font-size: 2em; margin-bottom: 10px;">⚠️</div>
+                        <p>${error}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            if (provinceName && leaders) {
+                // Show province details
+                content.innerHTML = `
+                    <div>
+                        <h3>${provinceName} Province</h3>
+                        <p><strong>${leaders.length}</strong> Representatives</p>
+                        <button onclick="showAllProvinces()" style="margin-bottom: 15px; padding: 5px 10px; background: #666; color: white; border: none; border-radius: 3px; cursor: pointer;">← Back to All</button>
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            ${leaders.map(leader => `
+                                <a href="leader-detail.html?id=${leader.id}" class="leader-item">
+                                    <img src="${getLeaderPhoto(leader)}" alt="${leader.name}" class="leader-photo" onerror="this.src='assets/placeholder.svg'">
+                                    <div class="leader-info">
+                                        <h4>${leader.name}</h4>
+                                        <p>${leader.metadata?.political_party || 'Independent'}</p>
+                                        <p>${leader.district?.name_en || leader.metadata?.district || 'Unknown District'}</p>
+                                    </div>
+                                </a>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Show all provinces
+                const provinceStats = provinces.map(province => {
+                    const count = leadersData.filter(leader => {
+                        const district = leader.district?.name_en || leader.metadata?.district;
+                        return district && districtToProvince[district] === province.name;
+                    }).length;
+                    return { ...province, count };
+                });
+                
+                content.innerHTML = `
+                    <div>
+                        <h3>Nepal Electoral Map</h3>
+                        <p>Click on a province to view representatives</p>
+                        <p><strong>${leadersData.length}</strong> Total Representatives</p>
+                        
+                        <div style="margin-top: 20px;">
+                            ${provinceStats.map(province => `
+                                <div onclick="selectProvince('${province.name}')" style="padding: 10px; margin: 5px 0; background: ${province.color}20; border-left: 4px solid ${province.color}; cursor: pointer; border-radius: 3px;">
+                                    <strong>${province.name}</strong>
+                                    <span style="float: right;">${province.count} reps</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <h4>Recent Leaders</h4>
+                            <div style="max-height: 300px; overflow-y: auto;">
+                                ${leadersData.slice(0, 10).map(leader => `
+                                    <a href="leader-detail.html?id=${leader.id}" class="leader-item">
+                                        <img src="${getLeaderPhoto(leader)}" alt="${leader.name}" class="leader-photo" onerror="this.src='assets/placeholder.svg'">
+                                        <div class="leader-info">
+                                            <h4>${leader.name}</h4>
+                                            <p>${leader.metadata?.political_party || 'Independent'}</p>
+                                        </div>
+                                    </a>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        function showAllProvinces() {
+            selectedProvince = null;
+            updateSidebar();
+        }
+        
+        function getLeaderPhoto(leader) {
+            if (leader.images?.images?.original) {
+                return leader.images.images.original;
+            }
+            if (leader.metadata?.photo_url) {
+                return leader.metadata.photo_url;
+            }
+            
+            const id = leader.id || 1000;
+            const gender = leader.gender || 0;
+            
+            if (gender === 1) {
+                return `https://i.pravatar.cc/200?img=${(id % 70) + 40}`;
+            } else {
+                return `https://i.pravatar.cc/200?img=${(id % 70) + 1}`;
+            }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initMap);
+    </script>
+</body>
+</html>
