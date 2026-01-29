@@ -46,7 +46,7 @@ class NepalEntityHandler(http.server.SimpleHTTPRequestHandler):
             print(f"Single Entity Request: ID {entity_id}")
             
             # Load parliament data
-            parliament_file = Path(__file__).parent / "parliament_data.json"
+            parliament_file = Path(__file__).parent / "parliament_data_enhanced.json"
             if parliament_file.exists():
                 with open(parliament_file, 'r', encoding='utf-8') as f:
                     parliament_data = json.load(f)
@@ -140,13 +140,13 @@ class NepalEntityHandler(http.server.SimpleHTTPRequestHandler):
             self.send_error(500, f"Internal server error: {e}")
 
     def handle_entities_api(self, query):
-        """Handle entities API with mock data from parliament_data.json"""
+        """Handle entities API with mock data from parliament_data_enhanced.json"""
         try:
             print(f"API Request: {self.path}")
             print(f"Query params: {query}")
             
             # Load parliament data
-            parliament_file = Path(__file__).parent / "parliament_data.json"
+            parliament_file = Path(__file__).parent / "parliament_data_enhanced.json"
             if parliament_file.exists():
                 with open(parliament_file, 'r', encoding='utf-8') as f:
                     parliament_data = json.load(f)
@@ -313,7 +313,7 @@ def main():
         return
     
     # Check if parliament data exists
-    if os.path.exists('parliament_data.json'):
+    if os.path.exists('parliament_data_enhanced.json'):
         print("✅ Parliament data found - will serve real data")
     else:
         print("⚠️  Parliament data not found - will serve mock data")
