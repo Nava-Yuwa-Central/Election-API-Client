@@ -592,13 +592,33 @@
             document.getElementById('provinceTitle').textContent = 'All Nepal';
             document.getElementById('provinceCapital').textContent = 'Capital: Kathmandu';
 
+            // Sort all leaders by province for better organization
+            const sortedLeaders = [...leadersData].sort((a, b) => {
+                const provA = getProvinceForLeader(a) || 'Unknown';
+                const provB = getProvinceForLeader(b) || 'Unknown';
+                
+                if (provA !== provB) {
+                    return provA.localeCompare(provB);
+                }
+                
+                // Within same province, sort by parliament type then name
+                const typeA = a.parliament_type === 'hr' ? 0 : 1;
+                const typeB = b.parliament_type === 'hr' ? 0 : 1;
+                
+                if (typeA !== typeB) {
+                    return typeA - typeB;
+                }
+                
+                return a.name.localeCompare(b.name);
+            });
+
             document.getElementById('countLeaders').textContent = leadersData.length;
             const uniqueProvinces = new Set(
                 leadersData.map(l => getProvinceForLeader(l)).filter(Boolean)
             ).size;
             document.getElementById('countDistricts').textContent = uniqueProvinces + ' Provinces';
 
-            renderLeaders(leadersData.slice(0, 20)); // Show first 20 leaders
+            renderLeaders(sortedLeaders.slice(0, 50)); // Show first 50 leaders organized by province
             renderParties(leadersData);
             switchTab('leaders');
         }
@@ -757,15 +777,20 @@
         }
 
         function getProvinceForLeader(leader) {
-            // First check if province is directly available
+            // First check if province is directly available in metadata
             if (leader.metadata?.province) {
                 return leader.metadata.province;
             }
             
+            // Check if province is in the main leader object
+            if (leader.province) {
+                return leader.province;
+            }
+            
             // Use district mapping from the actual data structure
-            const districtName = leader.district?.name_en || leader.district?.name;
+            const districtName = leader.district?.name_en || leader.district?.name || leader.metadata?.district;
             if (districtName) {
-                // Map districts to provinces based on the actual data
+                // Enhanced district to province mapping
                 const districtToProvinceMap = {
                     // Province 1 (Koshi)
                     'Taplejung': 'Koshi', 'Panchthar': 'Koshi', 'Ilam': 'Koshi', 'Jhapa': 'Koshi',
@@ -774,8 +799,55 @@
                     'Okhaldhunga': 'Koshi', 'Khotang': 'Koshi', 'Udayapur': 'Koshi',
                     
                     // Province 2 (Madhesh)  
-                    'Saptari': 'Madhesh', 'Siraha': 'Madhesh', 'Dhanusha': 'Madhesh', 
+                    'Saptari': 'Madhesh', 'Siraha': 'Madhesh', 'Dhanusha': 'Madhesh', 'Dhanusa': 'Madhesh',
                     'Mahottari': 'Madhesh', 'Sarlahi': 'Madhesh', 'Rautahat': 'Madhesh',
+                    'Bara': 'Madhesh', 'Parsa': 'Madhesh',
+                    
+                    // Province 3 (Bagmati)
+                    'Dolakha': 'Bagmati', 'Ramechhap': 'Bagmati', 'Sindhuli': 'Bagmati',
+                    'Kavrepalanchok': 'Bagmati', 'Sindhupalchok': 'Bagmati', 'Sindhupalchowk': 'Bagmati',
+                    'Rasuwa': 'Bagmati', 'Nuwakot': 'Bagmati', 'Dhading': 'Bagmati',
+                    'Chitwan': 'Bagmati', 'Makwanpur': 'Bagmati', 'Bhaktapur': 'Bagmati',
+                    'Lalitpur': 'Bagmati', 'Kathmandu': 'Bagmati',
+                    
+                    // Province 4 (Gandaki)
+                    'Gorkha': 'Gandaki', 'Lamjung': 'Gandaki', 'Tanahu': 'Gandaki',
+                    'Syangja': 'Gandaki', 'Kaski': 'Gandaki', 'Manang': 'Gandaki',
+                    'Mustang': 'Gandaki', 'Myagdi': 'Gandaki', 'Nawalpur': 'Gandaki',
+                    'Parbat': 'Gandaki', 'Baglung': 'Gandaki',
+                    
+                    // Province 5 (Lumbini)
+                    'Rukum East': 'Lumbini', 'Rolpa': 'Lumbini', 'Pyuthan': 'Lumbini',
+                    'Gulmi': 'Lumbini', 'Arghakhanchi': 'Lumbini', 'Palpa': 'Lumbini',
+                    'Parasi': 'Lumbini', 'Rupandehi': 'Lumbini', 'Kapilvastu': 'Lumbini',
+                    'Kapilbastu': 'Lumbini', 'Dang': 'Lumbini', 'Banke': 'Lumbini', 'Bardiya': 'Lumbini',
+                    
+                    // Province 6 (Karnali)
+                    'Rukum West': 'Karnali', 'Salyan': 'Karnali', 'Dolpa': 'Karnali',
+                    'Jumla': 'Karnali', 'Mugu': 'Karnali', 'Humla': 'Karnali',
+                    'Kalikot': 'Karnali', 'Jajarkot': 'Karnali', 'Dailekh': 'Karnali', 'Surkhet': 'Karnali',
+                    
+                    // Province 7 (Sudurpashchim)
+                    'Bajura': 'Sudurpashchim', 'Bajhang': 'Sudurpashchim', 'Doti': 'Sudurpashchim',
+                    'Achham': 'Sudurpashchim', 'Darchula': 'Sudurpashchim', 'Baitadi': 'Sudurpashchim',
+                    'Dadeldhura': 'Sudurpashchim', 'Kanchanpur': 'Sudurpashchim', 'Kailali': 'Sudurpashchim'
+                };
+                
+                // Try exact match first
+                let province = districtToProvinceMap[districtName];
+                if (province) return province;
+                
+                // Try case-insensitive match
+                const districtLower = districtName.toLowerCase();
+                for (const [district, prov] of Object.entries(districtToProvinceMap)) {
+                    if (district.toLowerCase() === districtLower) {
+                        return prov;
+                    }
+                }
+            }
+            
+            return null;
+        }hesh',
                     'Bara': 'Madhesh', 'Parsa': 'Madhesh',
                     
                     // Province 3 (Bagmati)
@@ -902,36 +974,69 @@
             // Zoom to feature
             map.fitBounds(layer.getBounds(), { padding: [20, 20] });
 
-            // Filter leaders by district first, then by province
+            // Filter leaders by district first, then by province with better logic
             let areaLeaders = [];
+            let isDistrictView = false;
             
             if (districtName && districtName !== 'Unknown') {
+                // District-level filtering
                 areaLeaders = leadersData.filter(l => {
-                    const lDist = l.district?.name_en || l.district?.name;
+                    const lDist = l.district?.name_en || l.district?.name || l.metadata?.district;
                     return lDist && lDist.toLowerCase() === districtName.toLowerCase();
                 });
+                isDistrictView = true;
+                console.log(`District filtering for ${districtName}: found ${areaLeaders.length} leaders`);
             }
             
-            // If no district leaders found, try province
-            if (areaLeaders.length === 0 && provinceName) {
+            // If no district leaders found or if we're viewing province-level, get province leaders
+            if (areaLeaders.length === 0 && provinceName && provinceName !== 'Unknown Province') {
                 areaLeaders = leadersData.filter(l => {
                     const prov = getProvinceForLeader(l);
                     return prov && prov.toLowerCase() === provinceName.toLowerCase();
                 });
+                isDistrictView = false;
+                console.log(`Province filtering for ${provinceName}: found ${areaLeaders.length} leaders`);
             }
 
-            // Update stats
+            // Sort leaders to prioritize by relevance
+            if (areaLeaders.length > 0) {
+                areaLeaders.sort((a, b) => {
+                    // First priority: Parliament members
+                    const aIsParliament = a.parliament_type === 'hr' ? 1 : 0;
+                    const bIsParliament = b.parliament_type === 'hr' ? 1 : 0;
+                    if (aIsParliament !== bIsParliament) {
+                        return bIsParliament - aIsParliament;
+                    }
+                    
+                    // Second priority: Exact district match (if viewing province)
+                    if (!isDistrictView && districtName) {
+                        const aDistrictMatch = (a.district?.name_en || a.metadata?.district || '').toLowerCase() === districtName.toLowerCase() ? 1 : 0;
+                        const bDistrictMatch = (b.district?.name_en || b.metadata?.district || '').toLowerCase() === districtName.toLowerCase() ? 1 : 0;
+                        if (aDistrictMatch !== bDistrictMatch) {
+                            return bDistrictMatch - aDistrictMatch;
+                        }
+                    }
+                    
+                    // Third priority: Alphabetical by name
+                    return a.name.localeCompare(b.name);
+                });
+            }
+
+            // Update stats with better information
             document.getElementById('countLeaders').textContent = areaLeaders.length;
             
-            // Count unique districts if showing province data
-            if (districtName && districtName !== 'Unknown') {
+            // Count unique districts and show relevant stats
+            if (isDistrictView) {
                 document.getElementById('countDistricts').textContent = '1';
             } else {
                 const uniqueDistricts = new Set(
-                    areaLeaders.map(l => l.district?.name_en || l.district?.name).filter(Boolean)
+                    areaLeaders.map(l => l.district?.name_en || l.district?.name || l.metadata?.district).filter(Boolean)
                 ).size;
                 document.getElementById('countDistricts').textContent = uniqueDistricts;
             }
+
+            // Add province-specific information to the dashboard
+            updateDashboardInfo(provinceName, districtName, areaLeaders, isDistrictView);
 
             // Render data
             renderLeaders(areaLeaders);
@@ -940,23 +1045,74 @@
         }
 
         function renderLeaders(leaders) {
-            const html = leaders.map(l => {
-                const districtName = l.district?.name_en || l.district?.name || 'Unknown District';
-                const partyName = l.political_party?.party_name_en || 'Independent';
+            if (!leaders || leaders.length === 0) {
+                document.getElementById('leadersList').innerHTML = 
+                    '<p class="text-center text-muted p-3">No leaders found for this area.</p>';
+                return;
+            }
+
+            const html = leaders.map((l, index) => {
+                const districtName = l.district?.name_en || l.district?.name || l.metadata?.district || 'Unknown District';
+                const partyName = l.political_party?.party_name_en || l.metadata?.political_party || l.metadata?.party || 'Independent';
+                const provinceName = getProvinceForLeader(l) || 'Unknown Province';
+                
+                // Get photo URL
+                const photoUrl = getLeaderPhotoUrl(l);
+                
+                // Determine leader type
+                const leaderType = l.parliament_type === 'hr' ? 'Parliament Member' : 
+                                 l.parliament_type === 'state' ? 'State Candidate' : 'Candidate';
+                
+                // Show district info if different from selected area
+                const locationInfo = `${districtName}${districtName !== provinceName ? `, ${provinceName}` : ''}`;
                 
                 return `
-                    <a href="leader-detail.html?id=${l.id}" class="leader-item">
-                        <div class="leader-info">
-                            <span class="leader-name">${l.name}</span>
-                            <span class="leader-meta">${districtName} • ${partyName}</span>
+                    <a href="leader-detail.html?id=${l.id}" class="leader-item" style="display: flex; align-items: center; padding: 12px; text-decoration: none; border-bottom: 1px solid #f1f1f1;">
+                        <div class="leader-photo" style="margin-right: 12px;">
+                            <img src="${photoUrl}" 
+                                 alt="${l.name}" 
+                                 style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #e5e7eb;"
+                                 onerror="this.src='assets/placeholder.svg'; this.onerror=null;">
                         </div>
-                        <span style="color: #ccc;">›</span>
+                        <div class="leader-info" style="flex: 1;">
+                            <div class="leader-name" style="font-weight: 600; color: #2c3e50; margin-bottom: 2px;">${l.name}</div>
+                            <div class="leader-meta" style="font-size: 0.85em; color: #666; margin-bottom: 2px;">
+                                <span style="color: var(--color-primary); font-weight: 500;">${partyName}</span>
+                            </div>
+                            <div class="leader-location" style="font-size: 0.8em; color: #888;">
+                                ${locationInfo} • ${leaderType}
+                            </div>
+                        </div>
+                        <span style="color: #ccc; font-size: 1.2em;">›</span>
                     </a>
                 `;
             }).join('');
             
-            document.getElementById('leadersList').innerHTML = html || 
-                '<p class="text-center text-muted p-3">No leaders found for this area.</p>';
+            document.getElementById('leadersList').innerHTML = html;
+        }
+
+        // Helper function to get leader photo URL
+        function getLeaderPhotoUrl(leader) {
+            // Try multiple sources for photo URL
+            if (leader.images && leader.images.images && leader.images.images.original) {
+                return leader.images.images.original;
+            }
+            if (leader.metadata && leader.metadata.photo_url) {
+                return leader.metadata.photo_url;
+            }
+            if (leader.metadata && leader.metadata.image_url) {
+                return leader.metadata.image_url;
+            }
+            
+            // Generate consistent photo based on ID and gender
+            const candidateId = leader.id || 1000;
+            const gender = leader.gender || 0;
+            
+            if (gender === 1) {
+                return `https://i.pravatar.cc/200?img=${(candidateId % 70) + 40}`;
+            } else {
+                return `https://i.pravatar.cc/200?img=${(candidateId % 70) + 1}`;
+            }
         }
 
         function renderParties(leaders) {
@@ -985,6 +1141,44 @@
 
             document.getElementById('tab-leaders').style.display = tabName === 'leaders' ? 'block' : 'none';
             document.getElementById('tab-parties').style.display = tabName === 'parties' ? 'block' : 'none';
+        }
+
+        function updateDashboardInfo(provinceName, districtName, leaders, isDistrictView) {
+            // Add additional context information
+            const dashboardSubtitle = document.getElementById('provinceCapital');
+            
+            if (leaders.length > 0) {
+                // Count parliament members vs candidates
+                const parliamentMembers = leaders.filter(l => l.parliament_type === 'hr').length;
+                const stateCandidates = leaders.filter(l => l.parliament_type === 'state').length;
+                const otherCandidates = leaders.length - parliamentMembers - stateCandidates;
+                
+                let infoText = '';
+                if (isDistrictView) {
+                    infoText = `Province: ${provinceName}`;
+                } else {
+                    const capitals = {
+                        'Koshi': 'Biratnagar', 'Madhesh': 'Janakpur', 'Bagmati': 'Hetauda',
+                        'Gandaki': 'Pokhara', 'Lumbini': 'Deukhuri', 'Karnali': 'Birendranagar',
+                        'Sudur Pashchim': 'Godawari', 'Sudurpashchim': 'Godawari'
+                    };
+                    infoText = `Capital: ${capitals[provinceName] || 'N/A'}`;
+                }
+                
+                // Add breakdown information
+                if (parliamentMembers > 0 || stateCandidates > 0) {
+                    const breakdown = [];
+                    if (parliamentMembers > 0) breakdown.push(`${parliamentMembers} Parliament`);
+                    if (stateCandidates > 0) breakdown.push(`${stateCandidates} State`);
+                    if (otherCandidates > 0) breakdown.push(`${otherCandidates} Other`);
+                    
+                    if (breakdown.length > 0) {
+                        infoText += ` • ${breakdown.join(', ')}`;
+                    }
+                }
+                
+                dashboardSubtitle.textContent = infoText;
+            }
         }
 
         function resetView() {
