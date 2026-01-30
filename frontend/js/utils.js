@@ -92,12 +92,12 @@ function throttle(func, limit = 100) {
  */
 function getImageUrl(leader, size = 'medium') {
     // Check multiple possible image sources
-    const imageUrl = leader?.metadata?.image_url || 
-                    leader?.metadata?.image || 
-                    leader?.metadata?.photo_url ||
-                    leader?.image_url ||
-                    leader?.image;
-    
+    const imageUrl = leader?.metadata?.image_url ||
+        leader?.metadata?.image ||
+        leader?.metadata?.photo_url ||
+        leader?.image_url ||
+        leader?.image;
+
     if (imageUrl) {
         // If it's a relative path from parliament API, make it absolute
         if (imageUrl.startsWith('/uploads/') || imageUrl.startsWith('uploads/')) {

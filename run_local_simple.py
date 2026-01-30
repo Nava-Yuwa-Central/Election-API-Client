@@ -79,7 +79,10 @@ class NepalEntityHandler(http.server.SimpleHTTPRequestHandler):
                 if member.get('images') and member['images'].get('images'):
                     image_name = member['images']['images'].get('original', '')
                     if image_name:
-                        image_url = f"https://hr.parliament.gov.np/uploads/images/{image_name}"
+                        if image_name.startswith('http'):
+                            image_url = image_name
+                        else:
+                            image_url = f"https://hr.parliament.gov.np/uploads/images/{image_name}"
                 
                 # Get Nepali name
                 nepali_name = ""
@@ -172,7 +175,10 @@ class NepalEntityHandler(http.server.SimpleHTTPRequestHandler):
                     if member.get('images') and member['images'].get('images'):
                         image_name = member['images']['images'].get('original', '')
                         if image_name:
-                            image_url = f"https://hr.parliament.gov.np/uploads/images/{image_name}"
+                            if image_name.startswith('http'):
+                                image_url = image_name
+                            else:
+                                image_url = f"https://hr.parliament.gov.np/uploads/images/{image_name}"
                     
                     # Get Nepali name
                     nepali_name = ""
@@ -315,28 +321,28 @@ class NepalEntityHandler(http.server.SimpleHTTPRequestHandler):
         return province_mapping.get(district, 'Unknown')
 
 def main():
-    print("🇳🇵 Nepal Entity Service - Local Development Server")
+    print("Nepal Entity Service - Local Development Server")
     print("=" * 60)
     
     # Check if frontend directory exists
     if not os.path.exists('frontend'):
-        print("❌ Frontend directory not found!")
+        print("X Frontend directory not found!")
         print("Please make sure you're running this from the project root directory.")
         return
     
     # Check if parliament data exists
     if os.path.exists('parliament_data_enhanced.json'):
-        print("✅ Parliament data found - will serve real data")
+        print("V Parliament data found - will serve real data")
     else:
-        print("⚠️  Parliament data not found - will serve mock data")
+        print("! Parliament data not found - will serve mock data")
     
-    print(f"\n🚀 Starting server on port {PORT}...")
-    print(f"📱 Frontend: http://localhost:{PORT}")
-    print(f"👥 Leaders: http://localhost:{PORT}/leaders.html")
-    print(f"🏛️  Parties: http://localhost:{PORT}/parties.html")
-    print(f"🔍 API Health: http://localhost:{PORT}/health")
-    print(f"📚 API Entities: http://localhost:{PORT}/api/v1/entities/")
-    print("\n💡 Press Ctrl+C to stop the server")
+    print(f"\nStarting server on port {PORT}...")
+    print(f"Frontend: http://localhost:{PORT}")
+    print(f"Leaders: http://localhost:{PORT}/leaders.html")
+    print(f"Parties: http://localhost:{PORT}/parties.html")
+    print(f"API Health: http://localhost:{PORT}/health")
+    print(f"API Entities: http://localhost:{PORT}/api/v1/entities/")
+    print("\nPress Ctrl+C to stop the server")
     print("=" * 60)
     
     try:
