@@ -155,6 +155,7 @@
             }
         }
     </style>
+    <script src="js/translations.js"></script>
 </head>
 
 <body>
@@ -167,11 +168,18 @@
             </a>
             <button class="navbar-toggle" id="navbarToggle">☰</button>
             <ul class="navbar-nav" id="navbarNav">
-                <li><a href="index.html" class="nav-link">Home</a></li>
-                <li><a href="map.html" class="nav-link">Map</a></li>
-                <li><a href="leaders.html" class="nav-link">Leaders</a></li>
-                <li><a href="parties.html" class="nav-link">Parties</a></li>
+                <li><a href="index.html" class="nav-link" data-i18n="nav-home">Home</a></li>
+                <li><a href="map.html" class="nav-link" data-i18n="nav-map">Map</a></li>
+                <li><a href="leaders.html" class="nav-link" data-i18n="nav-leaders">Leaders</a></li>
+                <li><a href="parties.html" class="nav-link" data-i18n="nav-parties">Parties</a></li>
             </ul>
+
+            <div class="nav-controls">
+                <button id="langEn" class="control-btn lang-btn" onclick="switchLanguage('en')">EN</button>
+                <button id="langNe" class="control-btn lang-btn" onclick="switchLanguage('ne')">ने</button>
+                <button id="themeToggle" class="control-btn" onclick="toggleTheme()"
+                    title="Toggle Dark Mode">🌙</button>
+            </div>
         </div>
     </nav>
 
@@ -319,7 +327,7 @@
 
             // Header
             document.getElementById('headerName').textContent = leader.name;
-            
+
             // Add Nepali name if available
             if (leader.name_nepali) {
                 document.getElementById('headerName').innerHTML = `
@@ -327,16 +335,16 @@
                     <span style="font-size: 0.7em; opacity: 0.9; font-weight: 500;">${leader.name_nepali}</span>
                 `;
             }
-            
+
             document.getElementById('headerParty').textContent = meta.party || meta.political_party || 'Independent';
 
             // Set image with proper fallback
             const headerImg = document.getElementById('headerImage');
             const imageUrl = getImageUrl(leader);
             console.log('Setting image URL:', imageUrl);
-            
+
             headerImg.src = imageUrl;
-            headerImg.onerror = function() {
+            headerImg.onerror = function () {
                 console.log('Image failed to load, using placeholder');
                 this.src = 'assets/placeholder.svg';
             };

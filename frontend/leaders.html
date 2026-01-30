@@ -15,150 +15,9 @@
 
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/components.css">
+    <script src="js/translations.js"></script>
     <link rel="stylesheet" href="styles/animations.css">
 
-    <style>
-        /* Table Styles similar to MyNeta */
-        .leaders-table-container {
-            overflow-x: auto;
-            background: white;
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-sm);
-            margin-top: var(--spacing-md);
-        }
-
-        .leaders-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-            min-width: 900px;
-            /* Ensure scroll on small screens */
-        }
-
-        .leaders-table th {
-            background-color: var(--color-primary);
-            color: white;
-            padding: 12px 15px;
-            text-align: left;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .leaders-table th.sortable {
-            cursor: pointer;
-            position: relative;
-        }
-
-        /* Candidate Photo Styles */
-        .candidate-photo-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .candidate-photo-small {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #e5e7eb;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .candidate-photo-small:hover {
-            border-color: var(--color-primary);
-            transform: scale(1.1);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .leaders-table th.sortable:hover {
-            background-color: var(--color-primary-dark);
-        }
-
-        .leaders-table th.sortable::after {
-            content: '↕';
-            font-size: 0.8em;
-            margin-left: 5px;
-            opacity: 0.7;
-        }
-
-        .leaders-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid var(--color-gray-light);
-            vertical-align: middle;
-        }
-
-        .leaders-table tr:nth-child(even) {
-            background-color: #f8f9fa;
-        }
-
-        .leaders-table tr:hover {
-            background-color: #f1f5f9;
-        }
-
-        .candidate-cell {
-            font-weight: 600;
-            color: var(--color-primary);
-        }
-
-        .candidate-cell a {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .candidate-cell a:hover {
-            text-decoration: underline;
-        }
-
-        .nepali-name {
-            display: block;
-            font-size: 0.85em;
-            color: var(--color-gray);
-            font-weight: normal;
-        }
-
-        .cases-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.8em;
-            font-weight: 600;
-        }
-
-        .cases-clean {
-            background-color: #d1fae5;
-            color: #065f46;
-            /* Green */
-        }
-
-        .cases-warning {
-            background-color: #fee2e2;
-            color: #991b1b;
-            /* Red */
-        }
-
-        .currency-cell {
-            font-family: monospace;
-            text-align: right;
-            font-weight: 500;
-        }
-
-        .filter-panel {
-            background: white;
-            padding: var(--spacing-lg);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-sm);
-            margin-bottom: var(--spacing-lg);
-            border: 1px solid var(--color-gray-light);
-        }
-
-        .filter-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: var(--spacing-md);
-        }
-    </style>
 </head>
 
 <body>
@@ -173,31 +32,43 @@
             <button class="navbar-toggle" id="navbarToggle">☰</button>
 
             <ul class="navbar-nav" id="navbarNav">
-                <li><a href="index.html" class="nav-link">Home</a></li>
-                <li><a href="map.html" class="nav-link">Map</a></li>
-                <li><a href="leaders.html" class="nav-link active">Leaders</a></li>
-                <li><a href="parties.html" class="nav-link">Parties</a></li>
-                <li><a href="photo-gallery.html" class="nav-link">Photos</a></li>
+                <li><a href="index.html" class="nav-link" data-i18n="nav-home">Home</a></li>
+                <li><a href="map.html" class="nav-link" data-i18n="nav-map">Map</a></li>
+                <li><a href="leaders.html" class="nav-link active" data-i18n="nav-leaders">Leaders</a></li>
+                <li><a href="parties.html" class="nav-link" data-i18n="nav-parties">Parties</a></li>
+                <li><a href="voting.html" class="nav-link" data-i18n="nav-voting">Voting</a></li>
             </ul>
+
+            <div class="nav-controls">
+                <button id="langEn" class="control-btn lang-btn" onclick="switchLanguage('en')">EN</button>
+                <button id="langNe" class="control-btn lang-btn" onclick="switchLanguage('ne')">ने</button>
+                <button id="themeToggle" class="control-btn" onclick="toggleTheme()"
+                    title="Toggle Dark Mode">🌙</button>
+            </div>
         </div>
     </nav>
 
-    <!-- Page Header -->
-    <section class="section bg-white" style="padding-bottom: var(--spacing-lg);">
-        <div class="container">
-            <h1 class="text-center fade-in-down">Parliament Members</h1>
-            <p class="text-center text-muted fade-in-up">
-                Detailed analysis of parliament members including criminal cases, assets, and liabilities
+    <!-- Header -->
+    <header class="hero" style="padding: var(--spacing-xl) 0; height: auto; text-align: center;">
+        <div class="container text-center">
+            <h1 class="fade-in-down" style="font-size: var(--font-size-5xl); margin-bottom: var(--spacing-xs);">
+                Political <span class="text-gradient">Leaders</span>
+            </h1>
+            <p class="fade-in-up"
+                style="opacity: 0.9; font-size: var(--font-size-xl); max-width: 800px; margin: 0 auto;">
+                Data-driven analysis of Nepal's parliamentary members, election history, and performance metrics.
             </p>
         </div>
-    </section>
+    </header>
 
-    <!-- Filter Section -->
-    <section class="section" style="padding-top: 0;">
+    <!-- Main Content -->
+    <section class="section" style="padding-top: 0; margin-top: -4rem;">
         <div class="container">
 
-            <div class="filter-panel fade-in-up">
-                <h3 style="margin-bottom: var(--spacing-md); font-size: var(--font-size-lg);">Filter Members</h3>
+            <div class="filter-panel fade-in-up"
+                style="box-shadow: var(--shadow-2xl); border: none; padding: 2rem; border-radius: var(--radius-lg); background: rgba(255,255,255,0.9); backdrop-filter: blur(20px);">
+                <h3 style="margin-bottom: var(--spacing-lg); font-size: var(--font-size-xl); letter-spacing: -0.02em;">
+                    🔍 Search & Filter Database</h3>
                 <div class="filter-grid">
                     <div class="filter-group">
                         <label class="filter-label" for="searchFilter">Search Candidate</label>
@@ -251,8 +122,9 @@
                     </div>
 
                     <div class="filter-group" style="display: flex; align-items: flex-end;">
-                        <button class="btn btn-primary" onclick="resetFilters()" style="width: 100%;">Reset
-                            Filters</button>
+                        <button class="btn btn-primary" onclick="resetFilters()" style="width: 100%; height: 42px;">
+                            🔄 Reset Filters
+                        </button>
                     </div>
                 </div>
             </div>
@@ -271,7 +143,6 @@
                 <table class="leaders-table">
                     <thead>
                         <tr>
-                            <th style="width: 60px;">Photo</th>
                             <th class="sortable" onclick="sortBy('name')">Candidate</th>
                             <th class="sortable" onclick="sortBy('party')">Party</th>
                             <th class="sortable" onclick="sortBy('cases')" style="text-align: center;">Criminal<br>Cases
@@ -310,10 +181,10 @@
                 <div class="footer-section">
                     <h4>Quick Links</h4>
                     <ul class="footer-links">
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="map.html">Map</a></li>
-                        <li><a href="leaders.html">Leaders</a></li>
-                        <li><a href="parties.html">Parties</a></li>
+                        <li><a href="index.html" class="nav-link" data-i18n="nav-home">Home</a></li>
+                        <li><a href="map.html" class="nav-link" data-i18n="nav-map">Map</a></li>
+                        <li><a href="leaders.html" class="nav-link" data-i18n="nav-leaders">Leaders</a></li>
+                        <li><a href="parties.html" class="nav-link" data-i18n="nav-parties">Parties</a></li>
                     </ul>
                 </div>
             </div>
@@ -358,7 +229,7 @@
 
         async function loadLeaders() {
             const tableBody = document.getElementById('leadersTableBody');
-            tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;">Loading data...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px;">Loading data...</td></tr>';
 
             try {
                 // Fetch leaders from API
@@ -373,11 +244,10 @@
                     return {
                         ...leader,
                         metadata: meta,
-                        // Try to get these from metadata, otherwise default/random for demo if empty
-                        criminal_cases: meta.criminal_cases || 0,
+                        criminal_cases: parseInt(meta.criminal_cases) || 0,
                         education: meta.education || 'Unknown',
-                        assets: meta.assets || 0,
-                        liabilities: meta.liabilities || 0,
+                        assets: parseFloat(meta.assets) || 0,
+                        liabilities: parseFloat(meta.liabilities) || 0,
                         age: meta.age || 'N/A'
                     };
                 });
@@ -387,7 +257,7 @@
                 renderTable();
             } catch (error) {
                 console.error('Error loading leaders:', error);
-                tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red; padding: 20px;">Failed to load data.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red; padding: 20px;">Failed to load data.</td></tr>';
             }
         }
 
@@ -494,6 +364,15 @@
                 currentSort.dir = 'asc'; // Default new sort to asc
             }
 
+            // Update header UI
+            document.querySelectorAll('.leaders-table th').forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+            });
+            const activeHeader = document.querySelector(`.leaders-table th[onclick*="'${field}'"]`);
+            if (activeHeader) {
+                activeHeader.classList.add(currentSort.dir === 'asc' ? 'sort-asc' : 'sort-desc');
+            }
+
             sortData(field, currentSort.dir);
             renderTable();
         }
@@ -509,6 +388,9 @@
                 if (field === 'party') {
                     valA = a.metadata?.party || '';
                     valB = b.metadata?.party || '';
+                } else if (field === 'cases') {
+                    valA = a.criminal_cases || 0;
+                    valB = b.criminal_cases || 0;
                 }
 
                 // String comparison
@@ -529,7 +411,7 @@
             if (filteredLeaders.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 40px;">
+                        <td colspan="6" style="text-align: center; padding: 40px;">
                             <div style="font-size: 40px; margin-bottom: 10px;">📭</div>
                             <p>No candidates found matching your criteria</p>
                         </td>
@@ -545,7 +427,7 @@
             const endIndex = Math.min(startIndex + itemsPerPage, filteredLeaders.length);
             const pageItems = filteredLeaders.slice(startIndex, endIndex);
 
-            resultsInfo.textContent = `Showing ${startIndex + 1} to ${endIndex} of ${filteredLeaders.length} candidates`;
+            resultsInfo.innerHTML = `Showing <span style="color: var(--color-primary); font-weight: 700;">${startIndex + 1} - ${endIndex}</span> of <span style="font-weight: 700;">${filteredLeaders.length}</span> candidates`;
 
             // Render Rows
             let html = '';
@@ -563,20 +445,13 @@
 
                 html += `
                     <tr>
-                        <td style="text-align: center; padding: 8px;">
-                            <div class="candidate-photo-container">
-                                <img src="${getPhotoUrl(leader)}" 
-                                     alt="${sanitizeHTML(leader.name)}" 
-                                     class="candidate-photo-small"
-                                     onerror="this.src='assets/placeholder.svg'; this.onerror=null;"
-                                     onclick="window.open('leader-detail.html?id=${leader.id}', '_blank')"
-                                     title="Click to view ${sanitizeHTML(leader.name)}'s profile">
-                            </div>
-                        </td>
                         <td class="candidate-cell">
                             <a href="leader-detail.html?id=${leader.id}">${sanitizeHTML(leader.name)}</a>
-                            ${leader.name_nepali ? `<span class="nepali-name">${sanitizeHTML(leader.name_nepali)}</span>` : ''}
-                            <span style="font-size: 0.8em; color: var(--color-gray); font-weight: normal;">Age: ${leader.age}</span>
+                            ${leader.name_nepali ? `<span class="nepali-name font-nepali">${sanitizeHTML(leader.name_nepali)}</span>` : ''}
+                            <div style="font-size: 0.75rem; color: var(--color-gray); margin-top: 4px;">
+                                🎂 <span style="font-weight: 600;">${leader.metadata?.age || 'N/A'}</span> yrs • 
+                                📍 <span style="font-weight: 600;">${leader.metadata?.province || 'Nepal'}</span>
+                            </div>
                         </td>
                         <td>
                             <span class="party-badge ${partyBadgeClass}" style="font-size: 0.8em;">${sanitizeHTML(partyName)}</span>

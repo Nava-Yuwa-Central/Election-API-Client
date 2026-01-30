@@ -108,32 +108,44 @@ class NepalEntityHandler(http.server.SimpleHTTPRequestHandler):
                     except:
                         age = "N/A"
                 
+                # Prepare metadata with defaults
+                district_en = member.get('district', {}).get('name_en', '')
+                province = self.get_province_from_district(district_en)
+                mm = member.get('metadata', {})
+                
+                metadata = {
+                    "member_id": member['id'],
+                    "political_party": party_name,
+                    "party": party_name,
+                    "district": district_en,
+                    "province": mm.get('province') or province,
+                    "image_url": image_url,
+                    "photo_url": mm.get('photo_url') or image_url,
+                    "gender": "Female" if member.get('gender') == 1 else "Male",
+                    "dob": member.get('dob', ''),
+                    "age": mm.get('age') or age,
+                    "election_type": member.get('election_type', {}).get('election_type_en', ''),
+                    "constituency": f"{district_en}-{member.get('election_area_no', '')}",
+                    "criminal_cases": mm.get('criminal_cases', 0),
+                    "education": mm.get('education') or mm.get('qualification', 'Graduate'),
+                    "assets": mm.get('assets', 5000000),
+                    "liabilities": mm.get('liabilities', 500000),
+                    "tenure_end_date": member.get('tenure_end_date', ''),
+                    "registered_date": member.get('registered_date', '')
+                }
+                
+                # Merge in any other existing metadata
+                for k, v in mm.items():
+                    if k not in metadata:
+                        metadata[k] = v
+
                 entity = {
                     "id": str(member['id']),
                     "name": member['name'],
                     "name_nepali": nepali_name,
                     "entity_type": "person",
                     "description": member.get('description', ''),
-                    "metadata": {
-                        "member_id": member['id'],
-                        "political_party": party_name,
-                        "party": party_name,
-                        "district": member.get('district', {}).get('name_en', ''),
-                        "province": self.get_province_from_district(member.get('district', {}).get('name_en', '')),
-                        "image_url": image_url,
-                        "photo_url": image_url,  # Alias for compatibility
-                        "gender": "Female" if member.get('gender') == 1 else "Male",
-                        "dob": member.get('dob', ''),
-                        "age": age,
-                        "election_type": member.get('election_type', {}).get('election_type_en', ''),
-                        "constituency": f"{member.get('district', {}).get('name_en', '')}-{member.get('election_area_no', '')}",
-                        "criminal_cases": 0,  # Mock data
-                        "education": "Graduate",  # Mock data
-                        "assets": 5000000,  # Mock data
-                        "liabilities": 500000,  # Mock data
-                        "tenure_end_date": member.get('tenure_end_date', ''),
-                        "registered_date": member.get('registered_date', '')
-                    }
+                    "metadata": metadata
                 }
                 
                 print(f"Found entity: {entity['name']} with image: {image_url}")
@@ -193,28 +205,43 @@ class NepalEntityHandler(http.server.SimpleHTTPRequestHandler):
                     if member.get('political_party'):
                         party_name = member['political_party']['party_name_en']
                     
+                    # Prepare metadata with defaults
+                    # Map province
+                    district_en = member.get('district', {}).get('name_en', '')
+                    province = self.get_province_from_district(district_en)
+                    
+                    # Construct metadata object, prioritizing what's already in member.metadata
+                    mm = member.get('metadata', {})
+                    
+                    metadata = {
+                        "member_id": member['id'],
+                        "political_party": party_name,
+                        "party": party_name,
+                        "district": district_en,
+                        "province": mm.get('province') or province,
+                        "image_url": image_url,
+                        "gender": member.get('gender'),
+                        "election_type": member.get('election_type', {}).get('election_type_en', ''),
+                        "constituency": f"{district_en}-{member.get('election_area_no', '')}",
+                        "criminal_cases": mm.get('criminal_cases', 0),
+                        "education": mm.get('education') or mm.get('qualification', 'Graduate'),
+                        "assets": mm.get('assets', 5000000),
+                        "liabilities": mm.get('liabilities', 500000),
+                        "age": mm.get('age') or "45"
+                    }
+                    
+                    # Merge in any other existing metadata
+                    for k, v in mm.items():
+                        if k not in metadata:
+                            metadata[k] = v
+
                     entity = {
                         "id": str(member['id']),
                         "name": member['name'],
                         "name_nepali": nepali_name,
                         "entity_type": "person",
                         "description": member.get('description', ''),
-                        "metadata": {
-                            "member_id": member['id'],
-                            "political_party": party_name,
-                            "party": party_name,  # Alias for compatibility
-                            "district": member.get('district', {}).get('name_en', ''),
-                            "province": self.get_province_from_district(member.get('district', {}).get('name_en', '')),
-                            "image_url": image_url,
-                            "gender": member.get('gender'),
-                            "election_type": member.get('election_type', {}).get('election_type_en', ''),
-                            "constituency": f"{member.get('district', {}).get('name_en', '')}-{member.get('election_area_no', '')}",
-                            "criminal_cases": 0,  # Mock data
-                            "education": "Graduate",  # Mock data
-                            "assets": 5000000,  # Mock data
-                            "liabilities": 500000,  # Mock data
-                            "age": "45"  # Mock data
-                        }
+                        "metadata": metadata
                     }
                     entities.append(entity)
                 
@@ -340,6 +367,7 @@ def main():
     print(f"Frontend: http://localhost:{PORT}")
     print(f"Leaders: http://localhost:{PORT}/leaders.html")
     print(f"Parties: http://localhost:{PORT}/parties.html")
+    print(f"Voting: http://localhost:{PORT}/voting.html")
     print(f"API Health: http://localhost:{PORT}/health")
     print(f"API Entities: http://localhost:{PORT}/api/v1/entities/")
     print("\nPress Ctrl+C to stop the server")

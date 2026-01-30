@@ -151,6 +151,47 @@ function getPartyBadgeClass(partyName) {
 }
 
 /**
+ * Get party logo URL from NES assets
+ */
+function getPartyLogoUrl(partyName) {
+    if (!partyName) return 'assets/placeholder.svg';
+
+    const mapping = {
+        'Nepali Congress': 'nepali-congress',
+        'Communist Party of Nepal (Unified Marxist-Leninist)': 'communist-party-of-nepal-unified-marxist-leninist',
+        'CPN-UML': 'communist-party-of-nepal-unified-marxist-leninist',
+        'CPN (UML)': 'communist-party-of-nepal-unified-marxist-leninist',
+        'CPN (Maoist Centre)': 'nepal-communist-party-maoist',
+        'Maoist Centre': 'nepal-communist-party-maoist',
+        'Rastriya Swatantra Party': 'national-independent-party',
+        'Janata Samajbadi Party, Nepal': 'janata-samajwadi-party-nepal',
+        'Janata Samajbadi Party': 'janata-samajbadi-party',
+        'CPN (Unified Socialist)': 'nepal-communist-party-unified-socialist',
+        'Rastriya Prajatantra Party': 'national-democratic-party',
+        'Loktantrik Samajbadi Party': 'democratic-socialist-party-nepal',
+        'Nagarik Unmukti Party': 'nagarik-unmukti-party',
+        'Janamat Party': 'janamat-party',
+        'Rastriya Janamorcha': 'rastriya-janamorcha',
+        'Nepal Workers Peasants Party': 'nepal-workers-peasants-party'
+    };
+
+    let slug = mapping[partyName];
+    if (!slug) {
+        const lower = partyName.toLowerCase();
+        if (lower.includes('congress')) slug = 'nepali-congress';
+        else if (lower.includes('uml')) slug = 'communist-party-of-nepal-unified-marxist-leninist';
+        else if (lower.includes('maoist')) slug = 'nepal-communist-party-maoist';
+        else if (lower.includes('swatantra')) slug = 'national-independent-party';
+        else if (lower.includes('prajatantra')) slug = 'national-democratic-party';
+        else {
+            slug = lower.replace(/\s+/g, '-').replace(/[()]/g, '').replace(/,/g, '');
+        }
+    }
+
+    return `https://assets.nes.newnepal.org/assets/images/2082-election-symbols/${slug}.png`;
+}
+
+/**
  * Sanitize HTML to prevent XSS
  */
 function sanitizeHTML(str) {

@@ -213,8 +213,11 @@ function initScrollToTop() {
     }, 200));
 }
 
+
 // Initialize features
 document.addEventListener('DOMContentLoaded', () => {
+    initThemeToggle();
+    initLanguage();
     initTooltips();
     initLazyLoading();
     initScrollToTop();
@@ -222,11 +225,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Theme toggle (for future dark mode support)
+ * Theme management
  */
 function initThemeToggle() {
     const savedTheme = storage.get('theme', 'light');
     document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
 }
 
 function toggleTheme() {
@@ -235,8 +239,79 @@ function toggleTheme() {
 
     document.documentElement.setAttribute('data-theme', newTheme);
     storage.set('theme', newTheme);
+    updateThemeIcon(newTheme);
 
     showToast(`Switched to ${newTheme} mode`, 'success');
+}
+
+function updateThemeIcon(theme) {
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+        btn.textContent = theme === 'light' ? '🌙' : '☀️';
+    }
+}
+
+/**
+ * Language management
+ */
+function initLanguage() {
+    const savedLang = storage.get('language', 'en');
+    document.documentElement.setAttribute('lang', savedLang);
+    updateLanguageUI(savedLang);
+}
+
+function switchLanguage(lang) {
+    storage.set('language', lang);
+    document.documentElement.setAttribute('lang', lang);
+    updateLanguageUI(lang);
+
+    // Optionally reload to apply all translations or use a client-side i18n
+    // location.reload();
+    showToast(`Language switched to ${lang === 'en' ? 'English' : 'Nepali'}`, 'success');
+}
+
+function applyTranslations(lang) {
+    if (typeof TRANSLATIONS === 'undefined') return;
+
+    const dict = TRANSLATIONS[lang];
+    if (!dict) return;
+
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) {
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                el.placeholder = dict[key];
+            } else {
+                el.innerHTML = dict[key];
+            }
+        }
+    });
+
+    // Handle title if needed
+    if (dict['page-title']) {
+        document.title = dict['page-title'];
+    }
+}
+
+function updateLanguageUI(lang) {
+    const enBtn = document.getElementById('langEn');
+    const neBtn = document.getElementById('langNe');
+
+    if (enBtn && neBtn) {
+        if (lang === 'en') {
+            enBtn.style.background = 'var(--color-primary)';
+            enBtn.style.color = 'white';
+            neBtn.style.background = 'var(--color-gray-light)';
+            neBtn.style.color = 'var(--color-dark)';
+        } else {
+            neBtn.style.background = 'var(--color-primary)';
+            neBtn.style.color = 'white';
+            enBtn.style.background = 'var(--color-gray-light)';
+            enBtn.style.color = 'var(--color-dark)';
+        }
+    }
+
+    applyTranslations(lang);
 }
 
 /**
@@ -256,5 +331,6 @@ if (typeof module !== 'undefined' && module.exports) {
         initNavigation,
         checkAPIHealth,
         toggleTheme,
+        switchLanguage
     };
 }

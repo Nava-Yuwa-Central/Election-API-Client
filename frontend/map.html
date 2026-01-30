@@ -19,6 +19,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/components.css">
+    <script src="js/translations.js"></script>
 
     <style>
         :root {
@@ -287,12 +288,19 @@
                 <span>Who's My Neta Nepal</span>
             </a>
             <ul class="navbar-nav">
-                <li><a href="index.html" class="nav-link">Home</a></li>
-                <li><a href="map.html" class="nav-link active">Map</a></li>
-                <li><a href="leaders.html" class="nav-link">Leaders</a></li>
-                <li><a href="parties.html" class="nav-link">Parties</a></li>
-                <li><a href="photo-gallery.html" class="nav-link">Photos</a></li>
+                <li><a href="index.html" class="nav-link" data-i18n="nav-home">Home</a></li>
+                <li><a href="map.html" class="nav-link active" data-i18n="nav-map">Map</a></li>
+                <li><a href="leaders.html" class="nav-link" data-i18n="nav-leaders">Leaders</a></li>
+                <li><a href="parties.html" class="nav-link" data-i18n="nav-parties">Parties</a></li>
+                <li><a href="voting.html" class="nav-link" data-i18n="nav-voting">Voting</a></li>
             </ul>
+
+            <div class="nav-controls">
+                <button id="langEn" class="control-btn lang-btn" onclick="switchLanguage('en')">EN</button>
+                <button id="langNe" class="control-btn lang-btn" onclick="switchLanguage('ne')">ने</button>
+                <button id="themeToggle" class="control-btn" onclick="toggleTheme()"
+                    title="Toggle Dark Mode">🌙</button>
+            </div>
         </div>
     </nav>
 

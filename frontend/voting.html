@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate Your Neta - Who's My Neta Nepal</title>
+
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <link rel="stylesheet" href="styles/animations.css">
+    <script src="js/translations.js"></script>
+
+    <style>
+        :root {
+            --rating-gold: #fbbf24;
+            --rating-gray: #e5e7eb;
+        }
+
+        .voting-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            border-bottom-left-radius: 50% 20px;
+            border-bottom-right-radius: 50% 20px;
+            margin-bottom: 3rem;
+        }
+
+        .voting-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .voting-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Voting Grid */
+        .voting-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .vote-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .vote-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border-color: var(--color-primary-light);
+        }
+
+        .candidate-img-wrapper {
+            position: relative;
+            padding-top: 125%;
+            /* 4:5 Aspect Ratio */
+            overflow: hidden;
+            background: #f7f7f7;
+        }
+
+        .candidate-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .vote-card:hover .candidate-img {
+            transform: scale(1.05);
+        }
+
+        .vote-overlay {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--color-primary);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .vote-content {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .candidate-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--color-dark);
+        }
+
+        .candidate-party {
+            font-size: 0.85rem;
+            color: var(--color-gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .candidate-meta-info {
+            display: flex;
+            gap: 15px;
+            font-size: 0.8rem;
+            color: var(--color-gray);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Rating Stars/Slider */
+        .rating-system {
+            margin-top: auto;
+        }
+
+        .stars-container {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .star {
+            font-size: 1.5rem;
+            color: var(--rating-gray);
+            cursor: pointer;
+            transition: transform 0.1s ease, color 0.1s ease;
+        }
+
+        .star.active {
+            color: var(--rating-gold);
+        }
+
+        .star:hover {
+            transform: scale(1.2);
+        }
+
+        .btn-vote {
+            width: 100%;
+            padding: 10px;
+            border-radius: 12px;
+            border: none;
+            background: var(--color-primary);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-vote:hover {
+            background: var(--color-primary-dark);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-vote.voted {
+            background: #10b981;
+            cursor: default;
+        }
+
+        /* Upvote/Downvote System */
+        .sentiment-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+
+        .btn-sentiment {
+            flex: 1;
+            padding: 10px;
+            border-radius: 12px;
+            border: 2px solid #f3f4f6;
+            background: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 0.9rem;
+        }
+
+        .btn-upvote:hover:not(:disabled) {
+            border-color: #10b981;
+            color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .btn-downvote:hover:not(:disabled) {
+            border-color: #ef4444;
+            color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .btn-upvote.active {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        .btn-downvote.active {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+
+        .sentiment-count {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            margin-left: 2px;
+        }
+
+        .net-score {
+            font-weight: 800;
+            font-size: 0.9rem;
+        }
+
+        .score-positive {
+            color: #10b981;
+        }
+
+        .score-negative {
+            color: #ef4444;
+        }
+
+        .score-neutral {
+            color: #6b7280;
+        }
+
+        /* Leaderboard Side */
+        .leaderboard-container {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .leaderboard-card {
+            background: white;
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f0f0f0;
+        }
+
+        .leaderboard-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .leaderboard-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .rank-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .rank-1 {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .rank-2 {
+            background: #e5e7eb;
+            color: #4b5563;
+        }
+
+        .rank-3 {
+            background: #ffedd5;
+            color: #9a3412;
+        }
+
+        .leaderboard-img {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .leaderboard-info {
+            flex-grow: 1;
+        }
+
+        .leaderboard-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: block;
+        }
+
+        .leaderboard-score {
+            font-size: 0.8rem;
+            color: #10b981;
+            font-weight: 700;
+        }
+
+        /* Search and Filter Area */
+        .filter-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            margin: -2rem auto 3rem;
+            max-width: 1000px;
+            z-index: 10;
+            position: relative;
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-input {
+            flex-grow: 1;
+            padding: 12px 20px;
+            border: 2px solid #f3f4f6;
+            border-radius: 15px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--color-primary);
+        }
+
+        .category-select {
+            padding: 12px 20px;
+            border: 2px solid #f3f4f6;
+            border-radius: 15px;
+            background: white;
+            cursor: pointer;
+            outline: none;
+        }
+    </style>
+    <script src="js/translations.js"></script>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <span>🇳🇵</span>
+                <span>Who's My Neta Nepal</span>
+            </a>
+            <ul class="navbar-nav">
+                <li><a href="index.html" class="nav-link" data-i18n="nav-home">Home</a></li>
+                <li><a href="map.html" class="nav-link" data-i18n="nav-map">Map</a></li>
+                <li><a href="leaders.html" class="nav-link" data-i18n="nav-leaders">Leaders</a></li>
+                <li><a href="parties.html" class="nav-link" data-i18n="nav-parties">Parties</a></li>
+                <li><a href="voting.html" class="nav-link active" data-i18n="nav-voting">Voting</a></li>
+            </ul>
+
+            <div class="nav-controls">
+                <button id="langEn" class="control-btn lang-btn" onclick="switchLanguage('en')">EN</button>
+                <button id="langNe" class="control-btn lang-btn" onclick="switchLanguage('ne')">ने</button>
+                <button id="themeToggle" class="control-btn" onclick="toggleTheme()"
+                    title="Toggle Dark Mode">🌙</button>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero" style="padding: var(--spacing-xl) 0; height: auto; text-align: center;">
+        <div class="container text-center">
+            <h1 class="fade-in-down" style="font-size: var(--font-size-5xl); margin-bottom: var(--spacing-xs);">
+                Voting <span class="text-gradient">Portal</span>
+            </h1>
+            <p class="fade-in-up"
+                style="opacity: 0.9; font-size: var(--font-size-xl); max-width: 800px; margin: 0 auto;">
+                Rate the performance and trust-level of political leaders in Nepal through real-time sentiment analysis.
+            </p>
+        </div>
+    </header>
+    <div class="container">
+        <div class="filter-section fade-in-up"><input type="text" id="votingSearch" class="search-input"
+                placeholder="Search for a leader to rate..."><select id="partyFilter" class="category-select">
+                <option value="">All Parties</option>
+            </select><select id="typeFilter" class="category-select">
+                <option value="all">All Members</option>
+                <option value="hr">Parliament Members</option>
+                <option value="state">State Candidates</option>
+            </select></div>
+    </div>
+    <div class="voting-container">
+        <!-- Main Voting Feed -->
+        <main>
+            <div class="voting-grid" id="votingGrid">
+                <!-- Populated by JavaScript -->
+            </div>
+            <div id="loadingState" style="text-align: center; padding: 4rem;">
+                <div class="spinner"></div>
+                <p style="margin-top: 1rem; color: #666;">Loading candidates...</p>
+            </div>
+            <div id="noResults" style="display: none; text-align: center; padding: 4rem;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">🔎</div>
+                <h3>No candidates found</h3>
+                <p>Try adjusting your search or filters</p>
+            </div>
+        </main>
+        <!-- Sidebar Leaderboard -->
+        <aside class="leaderboard-container">
+            <div class="leaderboard-card fade-in-up">
+                <h2 class="leaderboard-title">🏆 Top Sentiment</h2>
+                <div id="leaderboardList" class="leaderboard-list">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </aside>
+    </div>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        let allCandidates = [];
+        let userVotes = JSON.parse(localStorage.getItem('user_neta_votes') || '{}');
+        let userSentiments = JSON.parse(localStorage.getItem('user_neta_sentiments') || '{}');
+        let displayedCandidates = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadData();
+            setupFilters();
+        });
+
+        async function loadData() {
+            try {
+                // Fetch leaders
+                const response = await api.fetchLeaders({
+                    limit: 1000
+                });
+
+                // Add mock rating/sentiment data (normally from backend)
+                allCandidates = response.map(c => {
+                    const up = Math.floor(Math.random() * 500 + 100);
+                    const down = Math.floor(Math.random() * 200 + 20);
+
+                    return {
+                        ...c,
+                        ratingScore: (Math.random() * 6 + 3.5).toFixed(1),
+                        voteCount: up + down,
+                        upvotes: up,
+                        downvotes: down,
+                        netScore: up - down
+                    };
+                });
+
+                document.getElementById('loadingState').style.display = 'none';
+                updateFiltersAndDisplay();
+                renderLeaderboard();
+                populatePartyFilter();
+            }
+            catch (error) {
+                console.error('Error loading voting data:', error);
+                document.getElementById('loadingState').innerHTML = '<p style="color: red;">Failed to load voting data</p>';
+            }
+        }
+
+        function populatePartyFilter() {
+            const parties = [...new Set(allCandidates.map(c =>
+                c.political_party?.party_name_en || c.metadata?.party || 'Independent'
+            ))].sort();
+
+            const select = document.getElementById('partyFilter');
+
+            parties.forEach(party => {
+                const opt = document.createElement('option');
+                opt.value = party;
+                opt.textContent = party;
+                select.appendChild(opt);
+            });
+        }
+
+        function setupFilters() {
+            const searchInput = document.getElementById('votingSearch');
+            const partyFilter = document.getElementById('partyFilter');
+            const typeFilter = document.getElementById('typeFilter');
+
+            if (searchInput) searchInput.addEventListener('input', updateFiltersAndDisplay);
+            if (partyFilter) partyFilter.addEventListener('change', updateFiltersAndDisplay);
+            if (typeFilter) typeFilter.addEventListener('change', updateFiltersAndDisplay);
+        }
+
+        function updateFiltersAndDisplay() {
+            const search = document.getElementById('votingSearch').value.toLowerCase();
+            const party = document.getElementById('partyFilter').value;
+            const type = document.getElementById('typeFilter').value;
+
+            displayedCandidates = allCandidates.filter(c => {
+                const matchesSearch = !search || c.name.toLowerCase().includes(search) || (c.name_nepali && c.name_nepali.includes(search));
+
+                const cParty = c.political_party?.party_name_en || c.metadata?.party || 'Independent';
+                const matchesParty = !party || cParty === party;
+
+                const matchesType = type === 'all' || c.parliament_type === type;
+
+                return matchesSearch && matchesParty && matchesType;
+            });
+
+            renderVotingGrid();
+        }
+
+        function renderVotingGrid() {
+            const grid = document.getElementById('votingGrid');
+            const noResults = document.getElementById('noResults');
+
+            if (!grid) return;
+
+            if (displayedCandidates.length === 0) {
+                grid.style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            noResults.style.display = 'none';
+
+            // Limit to 40 for performance
+            const pageItems = displayedCandidates.slice(0, 40);
+
+            grid.innerHTML = pageItems.map(c => {
+                const imageUrl = getCandidatePhoto(c);
+                const hasVotedRating = userVotes[c.id];
+                const userSentiment = userSentiments[c.id]; // 'up' or 'down'
+                const upCount = c.upvotes + (userSentiment === 'up' ? 1 : 0);
+                const downCount = c.downvotes + (userSentiment === 'down' ? 1 : 0);
+                const netScore = upCount - downCount;
+                const scoreClass = netScore > 0 ? 'score-positive' : (netScore < 0 ? 'score-negative' : 'score-neutral');
+
+                return `
+                    <div class="vote-card fade-in">
+                        <div class="candidate-img-wrapper">
+                            <img src="${imageUrl}" alt="${c.name}" class="candidate-img" onerror="this.src='assets/placeholder.svg'">
+                            <div class="vote-overlay ${scoreClass}">
+                                ${netScore > 0 ? '+' : ''}${netScore}
+                            </div>
+                        </div>
+                        <div class="vote-content">
+                            <div>
+                                <h3 class="candidate-name">${c.name}</h3>
+                                <div class="candidate-party">${c.political_party?.party_name_en || c.metadata?.party || 'Independent'}</div>
+                                <div class="candidate-meta-info">
+                                    <span class="meta-item">🎂 ${c.metadata?.age || 'N/A'} yrs</span>
+                                    <span class="meta-item">📍 ${c.metadata?.province || 'Nepal'}</span>
+                                </div>
+                            </div>
+                            <div class="rating-system">
+                                <div class="stars-container" id="stars-${c.id}" data-current="${hasVotedRating || 0}">
+                                    ${renderStars(c.id, hasVotedRating || 0)}
+                                </div>
+                                <div class="sentiment-actions">
+                                    <button class="btn-sentiment btn-upvote ${userSentiment === 'up' ? 'active' : ''}" 
+                                            onclick="toggleSentiment(${c.id}, 'up')" id="up-${c.id}">
+                                        👍 <span class="sentiment-count">${upCount}</span>
+                                    </button>
+                                    <button class="btn-sentiment btn-downvote ${userSentiment === 'down' ? 'active' : ''}" 
+                                            onclick="toggleSentiment(${c.id}, 'down')" id="down-${c.id}">
+                                        👎 <span class="sentiment-count">${downCount}</span>
+                                    </button>
+                                </div>
+                                <div style="margin-top: 15px;">
+                                    <button class="btn-vote ${hasVotedRating ? 'voted' : ''}" 
+                                            onclick="submitRating(${c.id})" id="vote-btn-${c.id}"
+                                            ${hasVotedRating ? 'disabled' : ''}>
+                                        ${hasVotedRating ? '✅ Rated' : 'Rate Performance'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderStars(candidateId, rating) {
+            let html = '';
+            for (let i = 1; i <= 5; i++) {
+                const isActive = i <= rating;
+                html += `<span class="star ${isActive ? 'active' : ''}" 
+                         onclick="setStarRating(${candidateId}, ${i})" 
+                         data-value="${i}"
+                         onmouseover="highlightStars(${candidateId}, ${i})" 
+                         onmouseout="resetStars(${candidateId}, ${rating})">★</span>`;
+            }
+            return html;
+        }
+
+        function setStarRating(id, val) {
+            if (userVotes[id]) return;
+            const container = document.getElementById(`stars-${id}`);
+            if (container) {
+                container.setAttribute('data-current', val);
+                highlightStars(id, val);
+            }
+        }
+
+        function highlightStars(id, val) {
+            if (userVotes[id]) return;
+            const stars = document.querySelectorAll(`#stars-${id} .star`);
+            stars.forEach((s, idx) => {
+                if (idx < val) s.classList.add('active');
+                else s.classList.remove('active');
+            });
+        }
+
+        function resetStars(id, current) {
+            if (userVotes[id]) return;
+            const container = document.getElementById(`stars-${id}`);
+            if (container) {
+                const val = parseInt(container.getAttribute('data-current') || 0);
+                highlightStars(id, val);
+            }
+        }
+
+        function submitRating(id) {
+            const container = document.getElementById(`stars-${id}`);
+            if (!container) return;
+
+            const rating = parseInt(container.getAttribute('data-current') || 0);
+
+            if (rating === 0) {
+                alert('Please select a star rating first!');
+                return;
+            }
+
+            // Save vote
+            userVotes[id] = rating;
+            localStorage.setItem('user_neta_votes', JSON.stringify(userVotes));
+
+            // Update UI
+            const btn = document.getElementById(`vote-btn-${id}`);
+            if (btn) {
+                btn.classList.add('voted');
+                btn.disabled = true;
+                btn.innerHTML = '✅ Rated';
+                btn.style.transform = 'scale(0.95)';
+                setTimeout(() => btn.style.transform = 'scale(1)', 100);
+            }
+
+            // Highlight stars permanently
+            highlightStars(id, rating);
+        }
+
+        function toggleSentiment(id, type) {
+            const current = userSentiments[id];
+            if (current === type) {
+                delete userSentiments[id];
+            } else {
+                userSentiments[id] = type;
+            }
+
+            localStorage.setItem('user_neta_sentiments', JSON.stringify(userSentiments));
+
+            // Refresh grid and leaderboard
+            renderVotingGrid();
+            renderLeaderboard();
+        }
+
+        function renderLeaderboard() {
+            const list = document.getElementById('leaderboardList');
+            if (!list) return;
+
+            const top = [...allCandidates].map(c => {
+                const userSent = userSentiments[c.id];
+                const up = c.upvotes + (userSent === 'up' ? 1 : 0);
+                const down = c.downvotes + (userSent === 'down' ? 1 : 0);
+                return { ...c, currentNetScore: up - down };
+            }).sort((a, b) => b.currentNetScore - a.currentNetScore).slice(0, 10);
+
+            list.innerHTML = top.map((c, i) => `
+                <div class="leaderboard-item fade-in" style="animation-delay: ${i * 0.1}s">
+                    <div class="rank-circle ${i < 3 ? 'rank-' + (i + 1) : ''}">${i + 1}</div>
+                    <img src="${getCandidatePhoto(c)}" class="leaderboard-img" onerror="this.src='assets/placeholder.svg'">
+                    <div class="leaderboard-info">
+                        <span class="leaderboard-name">${c.name}</span>
+                        <span class="leaderboard-score ${c.currentNetScore >= 0 ? 'score-positive' : 'score-negative'}">
+                            Score: ${c.currentNetScore > 0 ? '+' : ''}${c.currentNetScore}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getCandidatePhoto(c) {
+            if (c.images?.images?.thumbnail) return c.images.images.thumbnail;
+            if (c.metadata?.photo_url) return c.metadata.photo_url;
+            const gender = c.gender || 0;
+            const id = c.id || 1000;
+            return `https://i.pravatar.cc/150?img=${(id % 70) + (gender === 1 ? 40 : 1)}`;
+        }
+    </script>
+</body>
+
+</html>

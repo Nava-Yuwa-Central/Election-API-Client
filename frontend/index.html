@@ -25,6 +25,7 @@
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/components.css">
   <link rel="stylesheet" href="styles/animations.css">
+  <script src="js/translations.js"></script>
 </head>
 
 <body>
@@ -41,45 +42,52 @@
       </button>
 
       <ul class="navbar-nav" id="navbarNav">
-        <li><a href="index.html" class="nav-link active">Home</a></li>
-        <li><a href="map.html" class="nav-link">Map</a></li>
-        <li><a href="leaders.html" class="nav-link">Leaders</a></li>
-        <li><a href="parties.html" class="nav-link">Parties</a></li>
-        <li><a href="photo-gallery.html" class="nav-link">Photos</a></li>
+        <li><a href="index.html" class="nav-link active" data-i18n="nav-home">Home</a></li>
+        <li><a href="map.html" class="nav-link" data-i18n="nav-map">Map</a></li>
+        <li><a href="leaders.html" class="nav-link" data-i18n="nav-leaders">Leaders</a></li>
+        <li><a href="parties.html" class="nav-link" data-i18n="nav-parties">Parties</a></li>
+        <li><a href="voting.html" class="nav-link" data-i18n="nav-voting">Voting</a></li>
       </ul>
+
+      <div class="nav-controls">
+        <button id="langEn" class="control-btn lang-btn" onclick="switchLanguage('en')">EN</button>
+        <button id="langNe" class="control-btn lang-btn" onclick="switchLanguage('ne')">ने</button>
+        <button id="themeToggle" class="control-btn" onclick="toggleTheme()" title="Toggle Dark Mode">🌙</button>
+      </div>
     </div>
   </nav>
 
   <!-- Hero Section -->
   <section class="hero">
     <div class="hero-content container">
-      <h1 class="hero-title fade-in-down">
-        Know Your Neta in Nepal
+      <h1 class="hero-title fade-in-down" data-i18n="hero-title">
+        Know Your <span class="text-gradient">Neta</span> in Nepal
       </h1>
-      <p class="hero-subtitle fade-in-up nepali-text">
-        को हो मेरो नेता नेपाल
+      <p class="hero-subtitle fade-in-up" data-i18n="hero-subtitle">
+        Empowering citizens with transparent data on political leaders, parties, and performance.
       </p>
-      <p class="hero-subtitle fade-in-up">
-        Explore political leaders, their constituencies, parties, and performance
-      </p>
-
-      <div class="search-container fade-in-up">
-        <span class="search-icon">🔍</span>
-        <input type="text" class="search-bar" id="heroSearch"
-          placeholder="Search for leaders, parties, or constituencies..." autocomplete="off">
-        <div class="search-results" id="heroSearchResults" style="display: none;"></div>
-      </div>
 
       <div class="hero-actions fade-in-up">
-        <a href="map.html" class="btn btn-primary btn-lg">
+        <a href="map.html" class="btn btn-primary" data-i18n="btn-explore">
           🗺️ Explore Map
         </a>
-        <a href="leaders.html" class="btn btn-outline btn-lg">
+        <a href="leaders.html" class="btn btn-outline" style="border-color: rgba(255,255,255,0.3); color: white;"
+          data-i18n="btn-browse">
           👥 Browse Leaders
         </a>
       </div>
     </div>
   </section>
+
+  <!-- Search Overlay -->
+  <div class="container" style="margin-top: -3.5rem; position: relative; z-index: 20;">
+    <div class="search-container fade-in-up">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-bar" id="heroSearch" data-i18n="search-placeholder"
+        placeholder="Find your representative by name, party, or district..." autocomplete="off">
+      <div class="search-results" id="heroSearchResults" style="display: none;"></div>
+    </div>
+  </div>
 
   <!-- Stats Section -->
   <section class="section">
@@ -88,19 +96,19 @@
         <div class="stat-card scroll-reveal">
           <div class="stat-card-icon">👥</div>
           <div class="stat-card-value" id="statLeaders">0</div>
-          <div class="stat-card-label">Political Leaders</div>
+          <div class="stat-card-label" data-i18n="stat-leaders">Political Leaders</div>
         </div>
 
         <div class="stat-card secondary scroll-reveal">
           <div class="stat-card-icon">🏛️</div>
           <div class="stat-card-value" id="statParties">0</div>
-          <div class="stat-card-label">Political Parties</div>
+          <div class="stat-card-label" data-i18n="stat-parties">Political Parties</div>
         </div>
 
         <div class="stat-card accent scroll-reveal">
           <div class="stat-card-icon">📍</div>
           <div class="stat-card-value" id="statProvinces">7</div>
-          <div class="stat-card-label">Provinces</div>
+          <div class="stat-card-label" data-i18n="stat-provinces">Provinces</div>
         </div>
       </div>
     </div>
@@ -109,7 +117,7 @@
   <!-- Featured Leaders Section -->
   <section class="section bg-white">
     <div class="container">
-      <h2 class="text-center mb-xl scroll-reveal">Featured Leaders</h2>
+      <h2 class="text-center mb-xl scroll-reveal" data-i18n="featured-leaders">Featured Leaders</h2>
 
       <div class="grid grid-3" id="featuredLeadersGrid">
         <!-- Loading state -->
@@ -120,7 +128,7 @@
       </div>
 
       <div class="text-center mt-xl">
-        <a href="leaders.html" class="btn btn-primary">View All Leaders</a>
+        <a href="leaders.html" class="btn btn-primary" data-i18n="view-all">View All Leaders</a>
       </div>
     </div>
   </section>
@@ -147,34 +155,34 @@
       <div class="footer-content">
         <div class="footer-section">
           <h4>Who's My Neta Nepal</h4>
-          <p style="color: rgba(255, 255, 255, 0.7);">
+          <p style="color: rgba(255, 255, 255, 0.7);" data-i18n="footer-desc">
             An open platform to explore and understand Nepali political leaders and their work.
           </p>
         </div>
 
         <div class="footer-section">
-          <h4>Quick Links</h4>
+          <h4 data-i18n="footer-quick-links">Quick Links</h4>
           <ul class="footer-links">
             <li><a href="index.html">Home</a></li>
             <li><a href="map.html">Interactive Map</a></li>
             <li><a href="leaders.html">All Leaders</a></li>
-            <li><a href="parties.html">Political Parties</a></li>
+            <li><a href="parties.html" data-i18n="nav-parties">Political Parties</a></li>
           </ul>
         </div>
 
         <div class="footer-section">
-          <h4>Resources</h4>
+          <h4 data-i18n="footer-resources">Resources</h4>
           <ul class="footer-links">
-            <li><a href="#">API Documentation</a></li>
-            <li><a href="#">Data Sources</a></li>
-            <li><a href="#">About Us</a></li>
-            <li><a href="#">Contact</a></li>
+            <li><a href="#" data-i18n="api-doc">API Documentation</a></li>
+            <li><a href="#" data-i18n="data-sources">Data Sources</a></li>
+            <li><a href="#" data-i18n="about-us">About Us</a></li>
+            <li><a href="#" data-i18n="contact">Contact</a></li>
           </ul>
         </div>
       </div>
 
       <div class="footer-bottom">
-        <p>&copy; 2025 Who's My Neta Nepal. Open Data Initiative.</p>
+        <p data-i18n="copyright">&copy; 2025 Who's My Neta Nepal. Open Data Initiative.</p>
       </div>
     </div>
   </footer>
