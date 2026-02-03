@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+sqlalchemy
+aiosqlite
+python-dotenv
+httpx
+python-multipart
+python-json-logger
+slowapi
+bleach

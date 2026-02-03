@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Political Parties - Who's My Neta Nepal</title>
+
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <script src="js/translations.js"></script>
+    <link rel="stylesheet" href="styles/animations.css">
+
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <span>🇳🇵</span>
+                <span>Who's My Neta Nepal</span>
+            </a>
+
+            <button class="navbar-toggle" id="navbarToggle">☰</button>
+
+            <ul class="navbar-nav" id="navbarNav">
+                <li><a href="index.html" class="nav-link" data-i18n="nav-home">Home</a></li>
+                <li><a href="map.html" class="nav-link" data-i18n="nav-map">Map</a></li>
+                <li><a href="leaders.html" class="nav-link" data-i18n="nav-leaders">Leaders</a></li>
+                <li><a href="parties.html" class="nav-link active" data-i18n="nav-parties">Parties</a></li>
+            </ul>
+
+            <div class="nav-controls">
+                <button id="langEn" class="control-btn lang-btn" onclick="switchLanguage('en')">EN</button>
+                <button id="langNe" class="control-btn lang-btn" onclick="switchLanguage('ne')">ने</button>
+                <button id="themeToggle" class="control-btn" onclick="toggleTheme()"
+                    title="Toggle Dark Mode">🌙</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="hero" style="padding: var(--spacing-xl) 0; height: auto; text-align: center;">
+        <div class="container text-center">
+            <h1 class="fade-in-down" style="font-size: var(--font-size-5xl); margin-bottom: var(--spacing-xs);">
+                Political <span class="text-gradient">Parties</span>
+            </h1>
+            <p class="fade-in-up"
+                style="opacity: 0.9; font-size: var(--font-size-xl); max-width: 800px; margin: 0 auto;">
+                Explore the landscape of Nepal's political organizations and their representation in parliament.
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <section class="section" style="padding-top: 0;">
+        <div class="container">
+            <div id="loading" class="text-center">
+                <div class="spinner"></div>
+                <p>Loading parties...</p>
+            </div>
+
+            <!-- Search & Info -->
+            <div class="fade-in-up"
+                style="margin-bottom: var(--spacing-xl); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-md);">
+                <div style="flex: 1; min-width: 300px; position: relative;">
+                    <span
+                        style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--color-gray);">🔍</span>
+                    <input type="text" id="partySearch" class="search-bar" placeholder="Search parties..."
+                        style="padding-left: 3rem; height: 50px; font-size: 1rem; margin: 0; box-shadow: var(--shadow-sm);">
+                </div>
+                <div id="partyStats" style="font-weight: 600; color: var(--color-gray);">
+                    Total: <span id="partyTotalCount" style="color: var(--color-primary);">0</span> Political Parties
+                </div>
+            </div>
+
+            <div id="partiesGrid" class="party-grid fade-in-up" style="display: none;">
+                <!-- Populated via JS -->
+            </div>
+
+            <div id="emptyState" class="text-center" style="display: none; padding: 40px;">
+                <p>No parties found.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 Who's My Neta Nepal. Open Data Initiative.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/main.js"></script>
+
+    <script>
+        let allParties = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                allParties = await api.fetchParties();
+                renderParties(allParties);
+                document.getElementById('loading').style.display = 'none';
+
+                // Set up search
+                const searchInput = document.getElementById('partySearch');
+                searchInput.addEventListener('input', (e) => {
+                    const term = e.target.value.toLowerCase();
+                    const filtered = allParties.filter(p =>
+                        p.name.toLowerCase().includes(term)
+                    );
+                    renderParties(filtered);
+                });
+            } catch (error) {
+                console.error('Error fetching parties:', error);
+                document.getElementById('loading').innerHTML = '<p style="color: red;">Failed to load parties</p>';
+            }
+        });
+
+        function renderParties(parties) {
+            const grid = document.getElementById('partiesGrid');
+            const totalCountEl = document.getElementById('partyTotalCount');
+
+            // Sort by count descending initially if it's the first load
+            if (arguments.length === 1 && parties === allParties) {
+                parties.sort((a, b) => b.count - a.count);
+            }
+
+            totalCountEl.textContent = parties.length;
+
+            if (parties.length === 0) {
+                grid.style.display = 'none';
+                document.getElementById('emptyState').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('emptyState').style.display = 'none';
+
+            grid.innerHTML = parties.map(party => {
+                const logoUrl = getPartyLogoUrl(party.name);
+                return `
+                <div class="party-card fade-in-up" onclick="window.location.href='leaders.html?party=${encodeURIComponent(party.name)}'">
+                    <div class="party-logo-container">
+                        <img src="${logoUrl}" 
+                             alt="${sanitizeHTML(party.name)}" 
+                             class="party-logo" 
+                             onerror="this.src='assets/placeholder.svg'; this.style.opacity='0.4';">
+                    </div>
+                    <div class="party-name">${sanitizeHTML(party.name)}</div>
+                    <div class="party-count">
+                        <span style="font-weight: 800; color: var(--color-primary);">${party.count}</span> Representative${party.count !== 1 ? 's' : ''}
+                    </div>
+                    <div style="margin-top: var(--spacing-md);">
+                        <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.8rem; width: 100%;">
+                            View Candidates
+                        </button>
+                    </div>
+                </div>
+            `}).join('');
+
+            grid.style.display = 'grid';
+        }
+    </script>
+</body>
+
+</html>

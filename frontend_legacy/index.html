@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Know your political representatives in Nepal. Explore leaders, their constituencies, parties, and performance metrics.">
+  <meta name="keywords" content="Nepal, politics, leaders, neta, representatives, parliament, election">
+  <meta name="author" content="Who's My Neta Nepal">
+
+  <title>Who's My Neta Nepal - Know Your Political Representatives</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/animations.css">
+  <script src="js/translations.js"></script>
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="index.html" class="navbar-brand">
+        <span>🇳🇵</span>
+        <span>Who's My Neta Nepal</span>
+      </a>
+
+      <button class="navbar-toggle" id="navbarToggle" aria-label="Toggle navigation">
+        ☰
+      </button>
+
+      <ul class="navbar-nav" id="navbarNav">
+        <li><a href="index.html" class="nav-link active" data-i18n="nav-home">Home</a></li>
+        <li><a href="map.html" class="nav-link" data-i18n="nav-map">Map</a></li>
+        <li><a href="leaders.html" class="nav-link" data-i18n="nav-leaders">Leaders</a></li>
+        <li><a href="parties.html" class="nav-link" data-i18n="nav-parties">Parties</a></li>
+      </ul>
+
+      <div class="nav-controls">
+        <button id="langEn" class="control-btn lang-btn" onclick="switchLanguage('en')">EN</button>
+        <button id="langNe" class="control-btn lang-btn" onclick="switchLanguage('ne')">ने</button>
+        <button id="themeToggle" class="control-btn" onclick="toggleTheme()" title="Toggle Dark Mode">🌙</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content container">
+      <h1 class="hero-title fade-in-down" data-i18n="hero-title">
+        Know Your <span class="text-gradient">Neta</span> in Nepal
+      </h1>
+      <p class="hero-subtitle fade-in-up" data-i18n="hero-subtitle">
+        Empowering citizens with transparent data on political leaders, parties, and performance.
+      </p>
+
+      <div class="hero-actions fade-in-up">
+        <a href="map.html" class="btn btn-primary" data-i18n="btn-explore">
+          🗺️ Explore Map
+        </a>
+        <a href="leaders.html" class="btn btn-outline" style="border-color: rgba(255,255,255,0.3); color: white;"
+          data-i18n="btn-browse">
+          👥 Browse Leaders
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search Overlay -->
+  <div class="container" style="margin-top: -3.5rem; position: relative; z-index: 20;">
+    <div class="search-container fade-in-up">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-bar" id="heroSearch" data-i18n="search-placeholder"
+        placeholder="Find your representative by name, party, or district..." autocomplete="off">
+      <div class="search-results" id="heroSearchResults" style="display: none;"></div>
+    </div>
+  </div>
+
+  <!-- Stats Section -->
+  <section class="section">
+    <div class="container">
+      <div class="stats-grid animate-children">
+        <div class="stat-card scroll-reveal">
+          <div class="stat-card-icon">👥</div>
+          <div class="stat-card-value" id="statLeaders">0</div>
+          <div class="stat-card-label" data-i18n="stat-leaders">Political Leaders</div>
+        </div>
+
+        <div class="stat-card secondary scroll-reveal">
+          <div class="stat-card-icon">🏛️</div>
+          <div class="stat-card-value" id="statParties">0</div>
+          <div class="stat-card-label" data-i18n="stat-parties">Political Parties</div>
+        </div>
+
+        <div class="stat-card accent scroll-reveal">
+          <div class="stat-card-icon">📍</div>
+          <div class="stat-card-value" id="statProvinces">7</div>
+          <div class="stat-card-label" data-i18n="stat-provinces">Provinces</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Leaders Section -->
+  <section class="section bg-white">
+    <div class="container">
+      <h2 class="text-center mb-xl scroll-reveal" data-i18n="featured-leaders">Featured Leaders</h2>
+
+      <div class="candidates-grid" id="featuredLeadersGrid">
+        <!-- Loading state -->
+        <div class="candidate-card-skeleton"></div>
+        <div class="candidate-card-skeleton"></div>
+        <div class="candidate-card-skeleton"></div>
+        <div class="candidate-card-skeleton"></div>
+        <div class="candidate-card-skeleton"></div>
+        <div class="candidate-card-skeleton"></div>
+      </div>
+
+      <div class="text-center mt-xl">
+        <a href="leaders.html" class="btn btn-primary" data-i18n="view-all">View All Leaders</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to Action -->
+  <section class="section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+    <div class="container text-center">
+      <h2 class="scroll-reveal" style="color: white;">Stay Informed About Your Representatives</h2>
+      <p class="scroll-reveal"
+        style="font-size: var(--font-size-xl); margin-bottom: var(--spacing-2xl); opacity: 0.95;">
+        Transparency and accountability in Nepali politics
+      </p>
+      <div class="scroll-reveal">
+        <a href="map.html" class="btn btn-lg" style="background-color: white; color: var(--color-primary);">
+          Get Started
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>Who's My Neta Nepal</h4>
+          <p style="color: rgba(255, 255, 255, 0.7);" data-i18n="footer-desc">
+            An open platform to explore and understand Nepali political leaders and their work.
+          </p>
+        </div>
+
+        <div class="footer-section">
+          <h4 data-i18n="footer-quick-links">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="map.html">Interactive Map</a></li>
+            <li><a href="leaders.html">All Leaders</a></li>
+            <li><a href="parties.html" data-i18n="nav-parties">Political Parties</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4 data-i18n="footer-resources">Resources</h4>
+          <ul class="footer-links">
+            <li><a href="#" data-i18n="api-doc">API Documentation</a></li>
+            <li><a href="#" data-i18n="data-sources">Data Sources</a></li>
+            <li><a href="#" data-i18n="about-us">About Us</a></li>
+            <li><a href="#" data-i18n="contact">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p data-i18n="copyright">&copy; 2025 Who's My Neta Nepal. Open Data Initiative.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    // Home page specific functionality
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log('🇳🇵 Who\'s My Neta Nepal - Optimized Home Page Loaded');
+
+      // Initialize scroll animations
+      initScrollAnimations();
+
+      // Load data in parallel for better performance
+      const loadPromises = [
+        loadStats(),
+        loadFeaturedLeaders(),
+        initializeSearch()
+      ];
+
+      // Execute all loading operations in parallel
+      await Promise.allSettled(loadPromises);
+    });
+
+    async function loadStats() {
+      try {
+        console.log('📊 Loading statistics...');
+        const stats = await api.fetchStats();
+        
+        // Animate counters with staggered timing for better UX
+        setTimeout(() => animateCounter('statLeaders', stats.totalLeaders), 100);
+        setTimeout(() => animateCounter('statParties', stats.totalParties), 200);
+        setTimeout(() => animateCounter('statProvinces', stats.totalProvinces), 300);
+        
+        console.log('✅ Statistics loaded successfully');
+      } catch (error) {
+        console.error('❌ Error loading stats:', error);
+        // Set fallback values
+        animateCounter('statLeaders', 264);
+        animateCounter('statParties', 12);
+        animateCounter('statProvinces', 7);
+      }
+    }
+
+    async function loadFeaturedLeaders() {
+      try {
+        console.log('👥 Loading featured leaders...');
+        const leaders = await api.fetchLeaders({ limit: 12 });
+        renderFeaturedLeaders(leaders);
+        console.log('✅ Featured leaders loaded successfully');
+      } catch (error) {
+        console.error('❌ Error loading featured leaders:', error);
+        const grid = document.getElementById('featuredLeadersGrid');
+        showError(grid, 'Failed to load leaders');
+      }
+    }
+
+    async function initializeSearch() {
+      const searchInput = document.getElementById('heroSearch');
+      const searchResults = document.getElementById('heroSearchResults');
+
+      if (!searchInput || !searchResults) return;
+
+      // Optimized debounced search with better performance
+      const debouncedSearch = debounce(async (query) => {
+        if (query.trim().length < 2) {
+          searchResults.style.display = 'none';
+          return;
+        }
+
+        try {
+          // Show loading state
+          searchResults.innerHTML = '<div class="search-result-item">🔍 Searching...</div>';
+          searchResults.style.display = 'block';
+
+          const results = await api.searchLeaders(query);
+
+          if (results.length === 0) {
+            searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+          } else {
+            searchResults.innerHTML = results.map(leader => `
+              <div class="search-result-item" onclick="navigateToLeader('${leader.id}')">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <img src="${getImageUrl(leader)}" 
+                       alt="${sanitizeHTML(leader.name)}"
+                       style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;"
+                       onerror="this.src='assets/placeholder.svg'">
+                  <div>
+                    <strong>${sanitizeHTML(leader.name)}</strong>
+                    ${leader.metadata?.political_party ? `<br><small style="color: var(--color-gray);">${sanitizeHTML(leader.metadata.political_party)}</small>` : ''}
+                  </div>
+                </div>
+              </div>
+            `).join('');
+          }
+
+          searchResults.style.display = 'block';
+        } catch (error) {
+          console.error('❌ Search error:', error);
+          searchResults.innerHTML = '<div class="search-result-item">Search failed. Please try again.</div>';
+        }
+      }, 300);
+
+      searchInput.addEventListener('input', (e) => {
+        debouncedSearch(e.target.value);
+      });
+
+      // Optimized click outside handler
+      document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+          searchResults.style.display = 'none';
+        }
+      });
+    }
+
+    function navigateToLeader(leaderId) {
+      window.location.href = `leader-detail.html?id=${leaderId}`;
+    }
+
+    function renderFeaturedLeaders(leaders) {
+      const grid = document.getElementById('featuredLeadersGrid');
+
+      if (!leaders || leaders.length === 0) {
+        showEmptyState(grid, 'No leaders found');
+        return;
+      }
+
+      // Render cards with optimized image loading
+      grid.innerHTML = leaders.map((leader, index) => `
+        <div class="candidate-card scroll-reveal" 
+             onclick="navigateToLeader('${leader.id}')"
+             style="animation-delay: ${index * 0.1}s">
+          <div class="candidate-card-header">
+            <img 
+              src="${getImageUrl(leader)}" 
+              alt="${sanitizeHTML(leader.name)}"
+              class="candidate-photo"
+              loading="lazy"
+              onerror="this.src='assets/placeholder.svg'"
+            >
+            <div class="candidate-badge">
+              <span class="party-badge party-${getPartyClass(leader.metadata?.political_party || leader.metadata?.party)}">${sanitizeHTML(leader.metadata?.political_party || leader.metadata?.party || 'Independent')}</span>
+            </div>
+          </div>
+          <div class="candidate-card-body">
+            <h3 class="candidate-name">${sanitizeHTML(leader.name)}</h3>
+            ${leader.name_nepali ? `<p class="candidate-name-nepali">${sanitizeHTML(leader.name_nepali)}</p>` : ''}
+            <div class="candidate-details">
+              <div class="candidate-location">
+                <span class="location-icon">📍</span>
+                <span>${sanitizeHTML(leader.metadata?.district || 'Unknown District')}</span>
+              </div>
+              ${leader.metadata?.province ? `<div class="candidate-province">${sanitizeHTML(leader.metadata.province)} Province</div>` : ''}
+            </div>
+            <div class="candidate-stats">
+              ${leader.metadata?.age ? `<div class="stat-item"><span class="stat-label">Age:</span> <span class="stat-value">${leader.metadata.age}</span></div>` : ''}
+              ${leader.metadata?.education ? `<div class="stat-item"><span class="stat-label">Education:</span> <span class="stat-value">${sanitizeHTML(leader.metadata.education)}</span></div>` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // Trigger scroll animations for newly added elements
+      setTimeout(() => {
+        initScrollAnimations();
+      }, 100);
+    }
+
+    function getPartyClass(partyName) {
+      if (!partyName) return 'independent';
+      const party = partyName.toLowerCase();
+      if (party.includes('congress')) return 'congress';
+      if (party.includes('uml')) return 'uml';
+      if (party.includes('maoist')) return 'maoist';
+      if (party.includes('rastriya')) return 'rastriya';
+      if (party.includes('samajwadi')) return 'samajwadi';
+      if (party.includes('janata')) return 'janata';
+      return 'other';
+    }
+
+    function animateCounter(elementId, targetValue) {
+      const element = document.getElementById(elementId);
+      if (!element) return;
+
+      const duration = 2000;
+      const startValue = 0;
+      const startTime = Date.now();
+
+      function update() {
+        const currentTime = Date.now();
+        const progress = Math.min((currentTime - startTime) / duration, 1);
+        
+        // Use easing function for smoother animation
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        const currentValue = Math.floor(startValue + (targetValue - startValue) * easeOutQuart);
+
+        element.textContent = formatNumber(currentValue);
+
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          // Ensure final value is exact
+          element.textContent = formatNumber(targetValue);
+        }
+      }
+
+      requestAnimationFrame(update);
+    }
+  </script>
+</body>
+
+</html>

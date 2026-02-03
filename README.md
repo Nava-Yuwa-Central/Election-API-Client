@@ -1,352 +1,165 @@
-# Nepal Entity Service - FastAPI
+# Nepal Entity Service - Optimized Local Server
 
-🇳🇵 **Who's My Neta Nepal** - Open Source, open data, and open API for managing Nepali public entities with comprehensive parliament member data and beautiful frontend.
+🇳🇵 **Who's My Neta Nepal** - A clean, optimized local server for exploring Nepal's political representatives with real parliament data.
 
 ## ✨ Features
 
-- **Complete Parliament Data**: All 264+ parliament members with photos, party affiliations, and detailed information
-- **Beautiful Frontend**: Modern, responsive web interface with search, filtering, and interactive displays
-- **FastAPI Backend**: Modern, fast web framework for building APIs
-- **PostgreSQL Database**: Robust relational database with advanced features
-- **Docker Deployment**: Containerized application with Docker Compose
-- **Entity Management**: Create, read, update, and delete Nepali entities
-- **Relationship Tracking**: Manage relationships between entities
-- **Async Support**: Fully asynchronous API for better performance
-- **Database Migrations**: Alembic for database schema management
-- **Type Safety**: Pydantic models for request/response validation
-- **Real Images**: Parliament member photos from official sources
+- **264+ Parliament Members** with official photos and complete data
+- **Optimized Performance** with in-memory caching and efficient data handling
+- **Beautiful Frontend** with responsive design and smooth animations
+- **Real-time Search** with instant results and photo synchronization
+- **Party Information** with color-coded badges and member counts
+- **Clean Architecture** with minimal dependencies and fast loading
 
 ## 🚀 Quick Start
 
 ### Prerequisites
+- **Python 3.7+** (no additional dependencies required)
+- **Web Browser** (Chrome, Firefox, Safari, Edge)
 
-- **Docker and Docker Compose** (Recommended - easiest setup)
-- **Python 3.12+** (for local development)
-- **Git** (to clone the repository)
+### Running the Application
 
-### Option 1: One-Click Setup (Windows)
-
-1. **Clone the repository:**
-```bash
-git clone <repository-url>
-cd nepal-entity-service-fastapi
-```
-
-2. **Run the setup script:**
-```powershell
-# PowerShell (Recommended)
-.\setup.ps1
-
-# Or Command Prompt
-run_setup.bat
-```
-
-3. **Access the application:**
-- **Main App**: http://localhost:8195
-- **API Docs**: http://localhost:8195/docs
-- **Leaders Page**: http://localhost:8195/leaders.html
-- **Parties Page**: http://localhost:8195/parties.html
-
-### Option 2: Manual Docker Setup
-
-1. **Clone and setup:**
-```bash
-git clone <repository-url>
-cd nepal-entity-service-fastapi
-cp .env.example .env
-```
-
-2. **Start services:**
-```bash
-docker compose up -d
-```
-
-3. **Load parliament data:**
-```bash
-# Wait for services to start (about 30 seconds)
-python scripts/comprehensive_seed_data.py
-```
-
-4. **Test the setup:**
-```bash
-python test_api_endpoints.py
-```
-
-### Option 3: Local Development
-
-1. **Setup Python environment:**
-```bash
-python -m venv venv
-# Windows:
-venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
-```
-
-2. **Install dependencies:**
-```bash
-pip install -r requirements.txt
-```
-
-3. **Setup PostgreSQL** and update `.env` with your database URL
-
-4. **Run migrations:**
-```bash
-alembic upgrade head
-```
-
-5. **Load data:**
-```bash
-python scripts/comprehensive_seed_data.py
-```
-
-6. **Start the server:**
-```bash
-uvicorn app.main:app --reload --port 8195
-```
-
-## 📊 What's Included
-
-### Parliament Data
-- **264+ Parliament Members** with official photos
-- **Political Party Information** with member counts
-- **District and Province** mapping
-- **Biographical Information** including Nepali names
-- **Electoral Details** including constituency information
-
-### Frontend Features
-- **Interactive Leaders Table** with sorting and filtering
-- **Party Overview Page** with member counts
-- **Search Functionality** with autocomplete
-- **Responsive Design** works on all devices
-- **Real Member Photos** from parliament.gov.np
-- **Bilingual Support** (English and Nepali names)
-
-### API Endpoints
-
-#### Entities
-- `GET /api/v1/entities/` - List all entities with filtering
-- `GET /api/v1/entities/{id}` - Get specific entity
-- `POST /api/v1/entities/` - Create new entity
-- `PUT /api/v1/entities/{id}` - Update entity
-- `DELETE /api/v1/entities/{id}` - Delete entity
-
-#### Query Parameters
-- `entity_type=person` - Filter by person entities (leaders)
-- `entity_type=political_party` - Filter by political parties
-- `search=query` - Search by name
-- `limit=50` - Limit results
-- `offset=0` - Pagination offset
-
-### Database Schema
-
-#### Entities Table
-- `id`: UUID (Primary Key)
-- `name`: String (255) - English name
-- `name_nepali`: String (255) - Nepali name
-- `entity_type`: Enum (person, organization, government, political_party, other)
-- `description`: Text
-- `metadata`: JSONB - Flexible data storage
-- `created_at`: Timestamp
-- `updated_at`: Timestamp
-
-#### Metadata Fields (for Parliament Members)
-```json
-{
-  "member_id": "Parliament member ID",
-  "political_party": "Party name in English",
-  "political_party_nepali": "Party name in Nepali",
-  "district": "District name",
-  "province": "Province name",
-  "image_url": "Official photo URL",
-  "gender": "0=male, 1=female",
-  "election_type": "Direct/Indirect",
-  "constituency": "Electoral constituency"
-}
-```
-
-## 🛠️ Configuration
-
-Environment variables in `.env` file:
-
-```env
-# Database
-POSTGRES_USER=nesuser
-POSTGRES_PASSWORD=nespassword123
-POSTGRES_DB=nepal_entity_db
-DATABASE_URL=postgresql://nesuser:nespassword123@localhost:5432/nepal_entity_db
-
-# Server
-HOST=0.0.0.0
-PORT=8195
-ENVIRONMENT=development
-LOG_LEVEL=INFO
-
-# Security
-SECRET_KEY=your-secret-key-here
-REQUIRE_AUTHENTICATION=false
-
-# CORS
-CORS_ORIGINS=["http://localhost:3000","http://localhost:8195"]
-```
-
-## 🐳 Docker Commands
+1. **Clone or download** this repository
+2. **Navigate** to the project directory
+3. **Run the server:**
 
 ```bash
-# Start all services
-docker compose up -d
+# Windows
+python run_local_simple.py
 
-# View logs
-docker compose logs -f
-
-# Stop services
-docker compose down
-
-# Rebuild containers
-docker compose up -d --build
-
-# Access database
-docker compose exec postgres psql -U nesuser -d nepal_entity_db
-
-# Run migrations in container
-docker compose exec api alembic upgrade head
+# Or use the batch file
+run_local.bat
 ```
 
-## 📱 Frontend Pages
+4. **Open your browser** and visit:
+   - **Main App**: http://localhost:8197
+   - **Leaders**: http://localhost:8197/leaders.html
+   - **Parties**: http://localhost:8197/parties.html
+   - **Map**: http://localhost:8197/map.html
 
-### Home Page (`/`)
-- Hero section with search
-- Statistics overview
-- Featured leaders
-- Quick navigation
+## 📁 Project Structure
 
-### Leaders Page (`/leaders.html`)
-- Complete parliament members table
-- Advanced filtering (party, province, education)
-- Sorting by various fields
-- Search functionality
-- Pagination
+```
+nepal-entity-service/
+├── frontend/                    # Frontend application
+│   ├── assets/                 # Images and static assets
+│   ├── data/                   # Nepal map data (GeoJSON)
+│   ├── js/                     # JavaScript modules
+│   │   ├── api.js             # Optimized API client
+│   │   ├── config.js          # Configuration
+│   │   ├── main.js            # Main application logic
+│   │   ├── translations.js    # Language support
+│   │   └── utils.js           # Utility functions
+│   ├── styles/                # CSS stylesheets
+│   │   ├── main.css          # Main styles and variables
+│   │   ├── components.css    # Component styles
+│   │   └── animations.css    # Animation definitions
+│   ├── index.html            # Landing page with featured leaders
+│   ├── leaders.html          # Complete leaders directory
+│   ├── parties.html          # Political parties overview
+│   ├── map.html              # Interactive Nepal map
+│   └── leader-detail.html    # Individual leader profiles
+├── data/                       # Raw data files
+├── database/                   # Data import scripts
+├── scripts/                    # Utility scripts
+├── run_local_simple.py        # Optimized local server
+├── run_local.bat             # Windows batch file
+├── run_local.ps1             # PowerShell script
+├── parliament_data_enhanced.json  # Parliament member data
+└── README.md                 # This file
+```
 
-### Parties Page (`/parties.html`)
-- All political parties with member counts
-- Party logos and information
-- Click to filter leaders by party
+## 🎯 Key Features
 
-### Map Page (`/map.html`)
-- Interactive Nepal map (coming soon)
-- Province-wise leader distribution
+### Performance Optimizations
+- **In-memory caching** with 5-minute TTL
+- **Thread-safe data access** for concurrent requests
+- **HTTP caching headers** for browser optimization
+- **Request deduplication** to prevent duplicate API calls
+- **Image preloading** for smooth user experience
+- **Lazy loading** for better page performance
 
-## 🔧 Development
+### Data Features
+- **Complete parliament data** with 264+ members
+- **Official photos** from parliament.gov.np
+- **Bilingual support** (English and Nepali names)
+- **Party affiliations** with color-coded badges
+- **District and province** mapping
+- **Age, education, and constituency** information
 
-### Adding New Data
+### User Interface
+- **Responsive design** that works on all devices
+- **Smooth animations** and transitions
+- **Real-time search** with instant results
+- **Card-based layout** for easy browsing
+- **Interactive map** with province data
+- **Clean, modern design** with Nepal-inspired colors
+
+## 🔧 Configuration
+
+The server runs on **port 8197** by default. You can modify this in `run_local_simple.py`:
+
 ```python
-# Add new parliament member
-python scripts/add_member.py --name "Member Name" --party "Party Name"
-
-# Update existing data
-python scripts/update_data.py
+PORT = 8197  # Change this to your preferred port
 ```
 
-### API Testing
-```bash
-# Test all endpoints
-python test_api_endpoints.py
+## 📊 API Endpoints
 
-# Manual API testing
-curl http://localhost:8195/api/v1/entities/?entity_type=person&limit=5
-```
-
-### Database Migrations
-```bash
-# Create new migration
-alembic revision --autogenerate -m "Description"
-
-# Apply migrations
-alembic upgrade head
-
-# Rollback
-alembic downgrade -1
-```
+- `GET /health` - Server health check
+- `GET /api/v1/entities/` - List all entities (leaders/parties)
+- `GET /api/v1/entities/{id}` - Get specific entity details
+- `GET /api/v1/entities/?entity_type=person` - Get all leaders
+- `GET /api/v1/entities/?entity_type=political_party` - Get all parties
+- `GET /api/v1/entities/?search=query` - Search entities
 
 ## 🎨 Customization
 
-### Adding New Entity Types
-1. Update `EntityType` enum in `app/models/entity.py`
-2. Create migration: `alembic revision --autogenerate -m "Add new entity type"`
-3. Update frontend filters and displays
+### Adding New Leaders
+1. Update `parliament_data_enhanced.json` with new member data
+2. Restart the server to reload the cache
+3. New members will appear automatically
 
 ### Styling
-- Main styles: `frontend/styles/main.css`
-- Components: `frontend/styles/components.css`
-- Animations: `frontend/styles/animations.css`
+- **Main colors**: Edit CSS variables in `frontend/styles/main.css`
+- **Components**: Modify `frontend/styles/components.css`
+- **Animations**: Update `frontend/styles/animations.css`
 
-### Adding New Pages
-1. Create HTML file in `frontend/`
-2. Add route in `app/main.py`
-3. Update navigation in existing pages
+### Adding Features
+- **New pages**: Create HTML files in `frontend/`
+- **API endpoints**: Add handlers in `run_local_simple.py`
+- **JavaScript**: Add modules in `frontend/js/`
 
 ## 🚨 Troubleshooting
 
-### Common Issues
+### Server Won't Start
+- Check if port 8197 is available
+- Ensure Python 3.7+ is installed
+- Verify `parliament_data_enhanced.json` exists
 
-**Docker services won't start:**
-```bash
-# Check Docker is running
-docker --version
+### Images Not Loading
+- Check internet connection (images load from parliament.gov.np)
+- Verify image URLs in the data file
+- Fallback placeholder images are provided
 
-# Check ports are free
-netstat -an | findstr :8195
-netstat -an | findstr :5432
-```
-
-**Database connection errors:**
-```bash
-# Check database is running
-docker compose ps
-
-# Reset database
-docker compose down -v
-docker compose up -d
-```
-
-**Python/API errors:**
-```bash
-# Check logs
-docker compose logs api
-
-# Restart API service
-docker compose restart api
-```
-
-**Frontend not loading:**
-- Check if API is running: http://localhost:8195/health
+### Performance Issues
 - Clear browser cache
-- Check browser console for errors
-
-### Performance Tips
-- Use pagination for large datasets
-- Enable database indexing for search fields
-- Use Redis caching for frequently accessed data
-- Optimize images for faster loading
+- Restart the server to refresh data cache
+- Check console for JavaScript errors
 
 ## 📄 License
 
-Hippocratic License 3.0 - See LICENSE file
+This project is open source and available under the [MIT License](LICENSE).
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create feature branch: `git checkout -b feature-name`
-3. Commit changes: `git commit -am 'Add feature'`
-4. Push to branch: `git push origin feature-name`
-5. Submit pull request
-
-## 📞 Support
-
-- **Issues**: Create GitHub issue
-- **Documentation**: Check `/docs` endpoint when running
-- **API Reference**: Visit `/docs` when server is running
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
 ---
 
 **Made with ❤️ for transparency in Nepali politics**
+
+*Empowering citizens with accessible, transparent data about their political representatives.*
